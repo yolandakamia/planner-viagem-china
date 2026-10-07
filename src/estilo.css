@@ -1,0 +1,154 @@
+/* System fonts only (nothing fetched at run time — Google Fonts is blocked
+   in China). The CJK families make Chinese addresses render on iPhone
+   (PingFang), Android (Noto Sans CJK) and Windows (Microsoft YaHei). */
+:root {
+  --fonte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+
+  --fundo: #faf7f5;
+  --superficie: #ffffff;
+  --superficie-2: #f3eeeb;
+  --texto: #1f1a18;
+  --texto-2: #6b605b;
+  --linha: #e6dfdb;
+  --acento: #b3261e;
+  --acento-texto: #ffffff;
+  --acento-suave: #fbe9e7;
+  --ok: #2e7d4f;
+  --aviso: #a15c00;
+
+  --raio: 14px;
+  --barra-abas: 64px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fundo: #141111;
+    --superficie: #1f1a19;
+    --superficie-2: #2a2322;
+    --texto: #f3ecea;
+    --texto-2: #b3a7a2;
+    --linha: #3a312f;
+    --acento: #ff8a7a;
+    --acento-texto: #2a0905;
+    --acento-suave: #3b1d19;
+    --ok: #7ccf9c;
+    --aviso: #f0b45c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fundo: #141111; --superficie: #1f1a19; --superficie-2: #2a2322; --texto: #f3ecea;
+  --texto-2: #b3a7a2; --linha: #3a312f; --acento: #ff8a7a; --acento-texto: #2a0905;
+  --acento-suave: #3b1d19; --ok: #7ccf9c; --aviso: #f0b45c; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--fonte);
+  background: var(--fundo);
+  color: var(--texto);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* ---------- shell ---------- */
+.app { min-height: 100dvh; display: flex; flex-direction: column; }
+.topo {
+  position: sticky; top: 0; z-index: 5;
+  padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
+  background: color-mix(in srgb, var(--fundo) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--linha);
+}
+.topo h1 { margin: 0; font-size: 20px; font-weight: 700; }
+.topo .sub { color: var(--texto-2); font-size: 13px; }
+.conteudo {
+  flex: 1; width: 100%; max-width: 720px; margin: 0 auto;
+  padding: 16px 16px calc(var(--barra-abas) + env(safe-area-inset-bottom) + 24px);
+}
+
+/* bottom tabs — reachable with the thumb */
+.abas {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  display: flex; justify-content: center;
+  background: var(--superficie);
+  border-top: 1px solid var(--linha);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.abas nav { display: flex; width: 100%; max-width: 720px; }
+.abas a {
+  flex: 1; min-height: var(--barra-abas);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  color: var(--texto-2); text-decoration: none; font-size: 11.5px; font-weight: 600;
+}
+.abas a svg { width: 24px; height: 24px; }
+.abas a.ativa { color: var(--acento); }
+.abas a.ativa svg { transform: translateY(-1px); }
+
+/* ---------- building blocks ---------- */
+.cartao {
+  background: var(--superficie); border: 1px solid var(--linha);
+  border-radius: var(--raio); padding: 16px; margin-bottom: 14px;
+}
+.cartao h2 { margin: 0 0 10px; font-size: 16px; }
+.muted { color: var(--texto-2); }
+.pequeno { font-size: 13px; }
+
+.campo { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.campo label { font-size: 13px; font-weight: 600; color: var(--texto-2); }
+.campo input, .campo select, .campo textarea {
+  width: 100%; min-width: 0; min-height: 46px; padding: 10px 12px;
+  border: 1px solid var(--linha); border-radius: 10px; background: var(--superficie-2);
+}
+.campo input:focus, .campo select:focus, .campo textarea:focus {
+  outline: 2px solid var(--acento); outline-offset: 1px; border-color: transparent;
+}
+.linha2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+
+.btn {
+  min-height: 46px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--linha);
+  background: var(--superficie-2); font-weight: 600; cursor: pointer;
+}
+.btn.primario { background: var(--acento); color: var(--acento-texto); border-color: transparent; }
+.btn:disabled { opacity: .5; }
+
+/* day list in Configurações */
+.dia { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 10px;
+  padding: 8px 0; border-top: 1px solid var(--linha); }
+.dia:first-child { border-top: 0; }
+.dia .quando { font-size: 13px; line-height: 1.2; }
+.dia .quando b { display: block; font-size: 15px; }
+.dia input { min-height: 42px; padding: 8px 10px; border: 1px solid var(--linha);
+  border-radius: 10px; background: var(--superficie-2); width: 100%; }
+
+/* clocks on Hoje */
+.relogios { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.relogio { text-align: center; padding: 12px; border-radius: 12px; background: var(--superficie-2); }
+.relogio .h { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.relogio .l { font-size: 12.5px; color: var(--texto-2); }
+.destaque { font-size: 40px; font-weight: 800; color: var(--acento); line-height: 1; }
+
+.vazio { text-align: center; padding: 40px 16px; color: var(--texto-2); }
+.vazio .emo { font-size: 40px; }
+
+/* "new version" banner, above the tab bar */
+.aviso-versao {
+  position: fixed; left: 12px; right: 12px; z-index: 20;
+  bottom: calc(var(--barra-abas) + env(safe-area-inset-bottom) + 10px);
+  max-width: 696px; margin: 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 14px; border: 0; width: calc(100% - 24px);
+  background: var(--texto); color: var(--fundo); font-weight: 600; text-align: left;
+  box-shadow: 0 6px 24px rgb(0 0 0 / .25); cursor: pointer;
+}
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 20;
+  bottom: calc(var(--barra-abas) + env(safe-area-inset-bottom) + 10px);
+  padding: 10px 14px; border-radius: 12px; background: var(--texto); color: var(--fundo);
+  font-size: 14px; font-weight: 600;
+}
