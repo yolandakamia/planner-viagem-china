@@ -2,6 +2,7 @@ import { abrirBanco } from "./banco";
 import type { Viagem, Dia } from "./tipos";
 import { listaDias } from "../lib/datas";
 import { uuid, agoraISO } from "../lib/uuid";
+import { avisarMudanca } from "./mudancas";
 
 /* First run: the trip as it stands in China_Trip_Planner.html (07/10/2026).
    Everything here is editable in Configurações. */
@@ -47,6 +48,7 @@ export async function salvarViagem(v: Viagem): Promise<void> {
     if (!(await idx.getKey(data))) await tx.objectStore("dias").put(novoDia(data));
   }
   await tx.done;
+  avisarMudanca();
 }
 
 /* the days of the trip, in order (records outside the range are left out) */
@@ -59,4 +61,5 @@ export async function diasDaViagem(v: Viagem): Promise<Dia[]> {
 export async function salvarDia(d: Dia): Promise<void> {
   const db = await abrirBanco();
   await db.put("dias", d);
+  avisarMudanca();
 }

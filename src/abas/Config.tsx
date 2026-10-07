@@ -2,6 +2,8 @@ import { useEffect, useState } from "preact/hooks";
 import type { Viagem, Dia } from "../db/tipos";
 import { salvarViagem, diasDaViagem, salvarDia } from "../db/viagem";
 import { diaSemana, diferencaDias } from "../lib/datas";
+import { ImportarPlanner } from "../comp/ImportarPlanner";
+import { useVersaoDados } from "../db/mudancas";
 
 /* Trip settings. Everything saves on its own when a field is committed
    ("change": leaving the field, Enter, or picking a date). */
@@ -10,7 +12,8 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
   const [dias, setDias] = useState<Dia[]>([]);
   const [msg, setMsg] = useState("");
 
-  useEffect(() => { diasDaViagem(viagem).then(setDias); }, [viagem]);
+  const versao = useVersaoDados();
+  useEffect(() => { diasDaViagem(viagem).then(setDias); }, [viagem, versao]);
   useEffect(() => { if (msg) { const t = setTimeout(() => setMsg(""), 1800); return () => clearTimeout(t); } }, [msg]);
 
   const datasOk = !!v.inicio && !!v.fim && v.fim >= v.inicio && diferencaDias(v.inicio, v.fim) <= 120;
@@ -63,6 +66,8 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
           );
         })}
       </div>
+
+      <ImportarPlanner />
 
       <div class="cartao">
         <h2>Seus dados</h2>

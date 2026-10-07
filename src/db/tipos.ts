@@ -40,6 +40,9 @@ export interface Evento {
      the sync may only touch coletivo records, never pessoal ones. */
   camada: Camada;
   origemId: string | null;
+  /* where a personal event was imported from ("planner:<id>"), so importing
+     again updates it instead of duplicating; null for events typed here */
+  ref?: string | null;
   data: ISODate;
   horaInicio: HHMM | "";
   horaFim: HHMM | "";
