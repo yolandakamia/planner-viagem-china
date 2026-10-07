@@ -8,6 +8,7 @@ import { Hoje } from "./abas/Hoje";
 import { EmBreve } from "./abas/EmBreve";
 import { Config } from "./abas/Config";
 import { Calendario } from "./abas/Calendario";
+import { MalaAba } from "./abas/Mala";
 
 /* Tabs live in the hash (#/hoje …): no server routing needed on GitHub Pages,
    and the Android back button moves between tabs. */
@@ -53,7 +54,7 @@ export function App() {
       <main class="conteudo">
         {aba === "hoje" && <Hoje viagem={viagem} />}
         {aba === "calendario" && <Calendario viagem={viagem} />}
-        {aba === "mala" && <EmBreve emo="🧳" texto="A mala chega na Fase 3." />}
+        {aba === "mala" && <MalaAba />}
         {aba === "looks" && <EmBreve emo="👔" texto="Os looks chegam na Fase 5." />}
         {aba === "config" && <Config viagem={viagem} aoSalvar={setViagem} />}
       </main>

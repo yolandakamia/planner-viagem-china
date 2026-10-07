@@ -1,5 +1,7 @@
 import { openDB, type DBSchema, type IDBPDatabase, type IDBPTransaction, type StoreNames } from "idb";
 import type { Meta, Viagem, Dia, Evento, Mala, Item, Foto, Look } from "./tipos";
+import { MALAS_PADRAO, ITENS_SUGERIDOS } from "./sugestoes";
+import { uuid } from "../lib/uuid";
 
 /* ------------------------------------------------------------------
    IndexedDB "viagem-china", versioned schema.
@@ -45,6 +47,29 @@ const MIGRACOES: Migracao[] = [
     it.createIndex("porStatus", "status");
     db.createObjectStore("fotos", { keyPath: "id" });
     db.createObjectStore("looks", { keyPath: "id" });
+  },
+
+  /* v2 — default bags + suggested packing list for China. Runs once per
+     device; only fills stores that are still empty, so nothing the user
+     created is touched and deleted suggestions never come back. */
+  async (_db, tx) => {
+    const malas = tx.objectStore("malas"), itens = tx.objectStore("itens");
+    if ((await malas.count()) > 0 || (await itens.count()) > 0) return;
+    const idDe: Record<string, string> = {};
+    for (const { chave, ...m } of MALAS_PADRAO) {
+      idDe[chave] = uuid();
+      await malas.put({ ...m, id: idDe[chave] });
+    }
+    const t = new Date().toISOString();
+    for (const [nome, categoria, subcategoria, quantidade, pesoG, mala, obs, soMao, estilo] of ITENS_SUGERIDOS) {
+      const item: Item = {
+        id: uuid(), nome, categoria, subcategoria, quantidade, pesoG,
+        malaId: idDe[mala], malaVoltaId: null, estilo: estilo ?? "", cor: "",
+        status: "a separar", fotoId: null, origem: "levar", obs, soMao: !!soMao,
+        criadoEm: t, atualizadoEm: t,
+      };
+      await itens.put(item);
+    }
   },
 ];
 

@@ -59,6 +59,8 @@ export interface Evento {
 export interface Mala {
   id: string;
   nome: string;
+  /* "despachada" bags get the cabin-only warning */
+  tipo?: "despachada" | "mao" | "mochila" | "outra";
   limiteKg: number | null;
   ordem: number;
   trecho: "ida" | "volta" | "ambos";
@@ -75,12 +77,18 @@ export interface Item {
   quantidade: number;
   pesoG: number | null;         // grams, integer
   malaId: string | null;
+  /* bag on the way back: null = same bag as the way out,
+     NAO_VOLTA = does not come back (given away, used up) */
   malaVoltaId: string | null;
   estilo: string;
   cor: string;
   status: StatusItem;
   fotoId: string | null;
   origem: OrigemItem;
+  obs?: string;
+  /* must travel in the cabin (power bank, documents): warns if it is put
+     in a checked bag */
+  soMao?: boolean;
   criadoEm: string;
   atualizadoEm: string;
 }
