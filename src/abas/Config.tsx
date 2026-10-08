@@ -7,6 +7,8 @@ import { CartaoBackup } from "../comp/Backup";
 import { useVersaoDados } from "../db/mudancas";
 import { useEspacoFotos } from "../db/fotos";
 import { tamanho } from "../lib/imagem";
+import { t, idioma, IDIOMAS, mudarIdioma } from "../lib/i18n";
+import { temaAtual, mudarTema, type Tema } from "../lib/tema";
 
 /* Trip settings. Everything saves on its own when a field is committed
    ("change": leaving the field, Enter, or picking a date). */
@@ -47,6 +49,7 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
 
   return (
     <>
+      <CartaoAparencia />
       <CartaoBackup />
 
       <div class="cartao">
@@ -91,5 +94,32 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
       </div>
       {msg && <div class="toast">{msg}</div>}
     </>
+  );
+}
+
+/* theme and language: per phone, saved in this browser */
+function CartaoAparencia() {
+  const [tema, setTema] = useState<Tema>(temaAtual());
+  const TEMAS: [Tema, string][] = [["auto", t("Automático")], ["claro", t("☀️ Claro")], ["escuro", t("🌙 Escuro")]];
+  return (
+    <div class="cartao">
+      <h2>{t("Aparência e idioma")}</h2>
+      <div class="campo"><label>{t("Tema")}</label>
+        <div class="seg" role="radiogroup">
+          {TEMAS.map(([id, rot]) => (
+            <button role="radio" aria-checked={tema === id} class={tema === id ? "on" : ""}
+              onClick={() => { mudarTema(id); setTema(id); }}>{rot}</button>))}
+        </div>
+        {tema === "auto" && <span class="muted pequeno">{t("Segue o modo claro/escuro do celular.")}</span>}
+      </div>
+      <div class="campo"><label>{t("Idioma")} · Language · 语言</label>
+        <div class="seg" role="radiogroup">
+          {IDIOMAS.map((i) => (
+            <button role="radio" lang={i.id} aria-checked={idioma === i.id} class={idioma === i.id ? "on" : ""}
+              onClick={() => idioma !== i.id && mudarIdioma(i.id)}>{i.rot}</button>))}
+        </div>
+        <span class="muted pequeno">{t("Muda os textos do app. O que vocês digitaram (eventos, itens) fica como está.")}</span>
+      </div>
+    </div>
   );
 }

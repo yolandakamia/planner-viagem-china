@@ -9,6 +9,7 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "types": ["vite/client", "vite-plugin-pwa/preact"]
   },
   "include": ["src"]
