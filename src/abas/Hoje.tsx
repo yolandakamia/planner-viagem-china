@@ -4,6 +4,7 @@ import { useDadosViagem } from "../db/useViagem";
 import { CartaoEvento, useEventosFolha } from "../comp/Eventos";
 import { situacoes } from "../lib/agora";
 import { LookDoDia } from "../comp/LookDoDia";
+import { LembreteBackup } from "../comp/Backup";
 import { conflitos } from "../lib/tempo";
 import {
   FUSO_BRASIL, FUSO_CHINA, hojeEm, horaEm, dataLonga, dataCurta, diferencaDias,
@@ -41,6 +42,7 @@ export function Hoje({ viagem }: { viagem: Viagem }) {
 
   return (
     <>
+      <LembreteBackup />
       <div class="relogios">
         <div class="relogio"><div class="h">{horaEm(FUSO_CHINA, agora)}</div><div class="l">🇨🇳 China · {dataCurta(hojeEm(FUSO_CHINA, agora))}</div></div>
         <div class="relogio"><div class="h">{horaEm(FUSO_BRASIL, agora)}</div><div class="l">🇧🇷 Brasil · {dataCurta(hojeEm(FUSO_BRASIL, agora))}</div></div>

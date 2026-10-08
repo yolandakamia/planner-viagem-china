@@ -3,6 +3,7 @@ import type { Viagem, Dia } from "../db/tipos";
 import { salvarViagem, diasDaViagem, salvarDia } from "../db/viagem";
 import { diaSemana, diferencaDias } from "../lib/datas";
 import { ImportarPlanner } from "../comp/ImportarPlanner";
+import { CartaoBackup } from "../comp/Backup";
 import { useVersaoDados } from "../db/mudancas";
 import { useEspacoFotos } from "../db/fotos";
 import { tamanho } from "../lib/imagem";
@@ -46,6 +47,8 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
 
   return (
     <>
+      <CartaoBackup />
+
       <div class="cartao">
         <h2>Viagem</h2>
         <div class="campo"><label for="c-nome">Nome da viagem</label><input id="c-nome" {...campo("nome")} /></div>

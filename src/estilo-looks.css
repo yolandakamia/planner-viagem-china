@@ -75,3 +75,10 @@
   .pv-agenda { width: 260px; margin: 8px 0 0; }
   .pv-palco-env { margin: 8px 0; }
 }
+
+/* ================= Fase 6: backup ================= */
+.lembrete-backup { display: block; text-decoration: none; color: var(--texto); }
+.contagens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 12px; padding: 0; list-style: none; margin: 0 0 12px; }
+.perigo { margin-top: 16px; border-top: 1px solid var(--linha); padding-top: 10px; }
+.perigo summary { cursor: pointer; color: var(--texto-2); font-size: 14px; min-height: 32px; }
+.giro-peq { display: inline-block; width: 14px; height: 14px; border-width: 2px; vertical-align: -2px; }
