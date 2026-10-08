@@ -38,8 +38,14 @@ export function novoItem(origem: OrigemItem = "levar", malaId: string | null = n
 export async function salvarItem(i: Item) {
   const db = await abrirBanco(); await db.put("itens", { ...i, atualizadoEm: agoraISO() }); avisarMudanca();
 }
+/* the item and its photo */
 export async function excluirItem(id: string) {
-  const db = await abrirBanco(); await db.delete("itens", id); avisarMudanca();
+  const db = await abrirBanco();
+  const tx = db.transaction(["itens", "fotos"], "readwrite");
+  const it = await tx.objectStore("itens").get(id);
+  if (it?.fotoId) await tx.objectStore("fotos").delete(it.fotoId);
+  await tx.objectStore("itens").delete(id);
+  await tx.done; avisarMudanca();
 }
 export async function salvarMala(m: Mala) {
   const db = await abrirBanco(); await db.put("malas", m); avisarMudanca();

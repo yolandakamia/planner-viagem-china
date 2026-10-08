@@ -4,6 +4,8 @@ import { salvarViagem, diasDaViagem, salvarDia } from "../db/viagem";
 import { diaSemana, diferencaDias } from "../lib/datas";
 import { ImportarPlanner } from "../comp/ImportarPlanner";
 import { useVersaoDados } from "../db/mudancas";
+import { useEspacoFotos } from "../db/fotos";
+import { tamanho } from "../lib/imagem";
 
 /* Trip settings. Everything saves on its own when a field is committed
    ("change": leaving the field, Enter, or picking a date). */
@@ -11,6 +13,10 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
   const [v, setV] = useState(viagem);
   const [dias, setDias] = useState<Dia[]>([]);
   const [msg, setMsg] = useState("");
+  const fotos = useEspacoFotos();
+  const [livre, setLivre] = useState<string>("");
+  useEffect(() => { navigator.storage?.estimate?.().then((e) => e.quota && setLivre(tamanho(e.quota - (e.usage ?? 0))));
+  }, [fotos.bytes]);
 
   const versao = useVersaoDados();
   useEffect(() => { diasDaViagem(viagem).then(setDias); }, [viagem, versao]);
@@ -74,7 +80,10 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
         <p class="pequeno muted" style="margin:0">
           Tudo fica guardado <b>só neste aparelho</b>, ligado ao endereço do site. Use sempre o mesmo link
           publicado (o do GitHub Pages) — o que você digitar em outro endereço fica em outro lugar.
+          As fotos nunca saem do celular.
         </p>
+        <p class="pequeno" style="margin:10px 0 0">📷 <b>{fotos.n}</b> {fotos.n === 1 ? "foto" : "fotos"} · <b>{tamanho(fotos.bytes)}</b>
+          {livre && <span class="muted"> · {livre} livres para o app</span>}</p>
       </div>
       {msg && <div class="toast">{msg}</div>}
     </>

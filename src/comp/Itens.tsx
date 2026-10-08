@@ -6,6 +6,8 @@ import {
 } from "../db/mala";
 import { uuid } from "../lib/uuid";
 import { Folha } from "./Folha";
+import { CampoFoto, Miniatura, type MudancaFoto } from "./Foto";
+import { gravarFoto, apagarFoto } from "../db/fotos";
 
 const ICONE_STATUS: Record<StatusItem, string> = { "a separar": "○", "separado": "◐", "na mala": "●" };
 export const proximoStatus = (s: StatusItem): StatusItem => STATUS[(STATUS.indexOf(s) + 1) % STATUS.length];
@@ -28,6 +30,8 @@ export function LinhaItem({ i, malas, volta = false, aoAbrir }: { i: Item; malas
         </button>)}
       {volta && <div class="item-st item-st-volta">{ORIGENS_VOLTA[i.origem as keyof typeof ORIGENS_VOLTA]?.emo ?? "📦"}</div>}
       <button class="item-corpo" onClick={() => aoAbrir(i)}>
+        <Miniatura fotoId={i.fotoId} class="item-mini" />
+        <div class="item-txt">
         <div class="item-nome">{i.nome || "(sem nome)"}{i.quantidade > 1 && <span class="item-qtd"> ×{i.quantidade}</span>}</div>
         <div class="item-info">
           <span>{mala?.nome ?? (volta ? "sem mala de destino" : "sem mala")}</span>
@@ -35,6 +39,7 @@ export function LinhaItem({ i, malas, volta = false, aoAbrir }: { i: Item; malas
           {i.subcategoria && <span>{i.subcategoria}</span>}
           {foraDaMao(i, malas) && <span class="tag tag-aviso">⚠️ só na bagagem de mão</span>}
           {!volta && i.malaVoltaId === NAO_VOLTA && <span class="tag">não volta</span>}
+        </div>
         </div>
       </button>
     </div>
@@ -44,6 +49,8 @@ export function LinhaItem({ i, malas, volta = false, aoAbrir }: { i: Item; malas
 /* ---------- item editor ---------- */
 export function EditorItem({ inicial, novo, malas, aoFechar }: { inicial: Item; novo: boolean; malas: Mala[]; aoFechar: () => void }) {
   const [i, setI] = useState(inicial);
+  const [foto, setFoto] = useState<MudancaFoto>({ tipo: "nada" });
+  const [salvando, setSalvando] = useState(false);
   const set = <K extends keyof Item>(k: K, v: Item[K]) => setI((x) => ({ ...x, [k]: v }));
   const val = (e: Event) => (e.target as HTMLInputElement).value;
   const ehVolta = i.origem !== "levar";
@@ -51,8 +58,12 @@ export function EditorItem({ inicial, novo, malas, aoFechar }: { inicial: Item; 
   const g = pesoTotal(i);
 
   async function salvar() {
-    if (!ok) return;
-    await salvarItem({ ...i, nome: i.nome.trim(), quantidade: Math.max(1, Math.round(i.quantidade || 1)) });
+    if (!ok || salvando) return;
+    setSalvando(true);
+    let fotoId = i.fotoId;
+    if (foto.tipo === "nova") { fotoId = await gravarFoto(foto.img); await apagarFoto(i.fotoId); }
+    if (foto.tipo === "remover") { await apagarFoto(i.fotoId); fotoId = null; }
+    await salvarItem({ ...i, fotoId, nome: i.nome.trim(), quantidade: Math.max(1, Math.round(i.quantidade || 1)) });
     aoFechar();
   }
   async function excluir() {
@@ -63,8 +74,9 @@ export function EditorItem({ inicial, novo, malas, aoFechar }: { inicial: Item; 
     <Folha titulo={novo ? (ehVolta ? "Trazer de volta" : "Novo item") : "Editar item"} aoFechar={aoFechar} rodape={<>
       {!novo && <button class="btn" onClick={excluir}>Excluir</button>}
       <button class="btn" onClick={aoFechar}>Cancelar</button>
-      <button class="btn primario" disabled={!ok} onClick={salvar}>Salvar</button>
+      <button class="btn primario" disabled={!ok || salvando} onClick={salvar}>Salvar</button>
     </>}>
+      {!ehVolta && <CampoFoto fotoId={i.fotoId} mudanca={foto} aoMudar={setFoto} />}
       <div class="campo"><label for="i-nome">Nome</label>
         <input id="i-nome" value={i.nome} onInput={(e) => set("nome", val(e))} placeholder={ehVolta ? "Ex.: amostras de HPL" : "Ex.: camisa social branca"} /></div>
 
