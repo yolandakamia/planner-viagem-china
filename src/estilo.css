@@ -152,3 +152,6 @@ button, input, select, textarea { font: inherit; color: inherit; }
   padding: 10px 14px; border-radius: 12px; background: var(--texto); color: var(--fundo);
   font-size: 14px; font-weight: 600;
 }
+/* "Claro" chosen in Ajustes: "only" forbids the browser's own forced darkening
+   (Samsung Internet dark mode, Chrome "auto-darken web pages") */
+:root[data-theme="light"] { color-scheme: only light; }

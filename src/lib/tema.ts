@@ -12,6 +12,8 @@ export function temaAtual(): Tema {
 export function aplicarTema(t: Tema = temaAtual()) {
   const r = document.documentElement;
   if (t === "auto") delete r.dataset.theme; else r.dataset.theme = t === "escuro" ? "dark" : "light";
+  // "only light" stops Samsung Internet / Chrome from darkening the page on their own
+  document.querySelector('meta[name="color-scheme"]')?.setAttribute("content", t === "claro" ? "only light" : t === "escuro" ? "dark" : "light dark");
   // the phone's status bar follows too
   const escuro = t === "escuro" || (t === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
   document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", escuro ? "#1c1717" : "#b3261e"));
