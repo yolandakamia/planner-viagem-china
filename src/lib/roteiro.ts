@@ -1,7 +1,7 @@
 /* The itinerary sent by the planner's "📤 Share itinerary" button.
 
-   It travels INSIDE the link, after "#roteiro=", as deflate-raw + base64url
-   JSON. The part after "#" never reaches any server: only whoever got the
+   It travels INSIDE the link, after "#roteiro=", as deflate-raw JSON encoded
+   "B<bytes>L<base32>" (the first links used base64url; still accepted). The part after "#" never reaches any server: only whoever got the
    message has the itinerary. The same code is accepted pasted from the whole
    WhatsApp/WeChat message ("Colar roteiro"), which is how an iPhone gets it
    into the app installed on the Home Screen (iOS opens links in Safari,
@@ -25,8 +25,38 @@ function deBase64url(s: string): Uint8Array<ArrayBuffer> {
   return u;
 }
 
+/* current code: "B<bytes>L<base32 a–z2–7>" — letters and digits only, since
+   WhatsApp reads "_" "-" "*" "~" as formatting and mangled base64url links */
+function deBase32(s: string): Uint8Array<ArrayBuffer> {
+  const AB = "abcdefghijklmnopqrstuvwxyz234567";
+  const out: number[] = []; let bits = 0, val = 0;
+  for (const c of s) {
+    const i = AB.indexOf(c); if (i < 0) throw new Error("caractere");
+    val = (val << 5) | i; bits += 5;
+    if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; }
+    val &= (1 << bits) - 1;
+  }
+  return new Uint8Array(out);
+}
+function decodificar(codigo: string): Uint8Array<ArrayBuffer> {
+  const m = /^B(\d+)L([a-z2-7]+)$/.exec(codigo);
+  if (!m) {
+    if (/^B\d+L/.test(codigo)) throw new Error("alterado");
+    return deBase64url(codigo);                     // first version of the links
+  }
+  const bytes = deBase32(m[2]), esperado = +m[1];
+  if (bytes.length < esperado)
+    throw new Error(`O link chegou cortado (${Math.round((bytes.length / esperado) * 100)}% do roteiro). Peça para reenviar, ou copie a mensagem inteira e use "Colar roteiro".`);
+  return bytes.subarray(0, esperado);
+}
+
 async function inflar(bytes: Uint8Array<ArrayBuffer>): Promise<string> {
-  const fluxo = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  if (typeof DecompressionStream === "undefined")
+    throw new Error("Este navegador é antigo demais para abrir o roteiro. Atualize o navegador (ou abra o link no Chrome) e tente de novo.");
+  let ds: DecompressionStream;
+  try { ds = new DecompressionStream("deflate-raw"); }
+  catch { throw new Error("Este navegador é antigo demais para abrir o roteiro. Atualize o navegador (ou abra o link no Chrome) e tente de novo."); }
+  const fluxo = new Blob([bytes]).stream().pipeThrough(ds);
   return new Response(fluxo).text();
 }
 
@@ -36,7 +66,19 @@ export async function lerRoteiro(texto: string): Promise<RoteiroRecebido> {
   const m = RE.exec(texto);
   if (!m) throw new Error("Não encontrei nenhum roteiro nesse texto. Copie a mensagem inteira (com o link) e tente de novo.");
   let j: { app?: string; v?: number; em?: string; plano?: string; eventos?: unknown; dias?: unknown };
-  try { j = JSON.parse(await inflar(deBase64url(m[1]))); }
+  let bytes: Uint8Array<ArrayBuffer>;
+  try { bytes = decodificar(m[1]); }
+  catch (e) {
+    if ((e as Error).message.startsWith("O link")) throw e;
+    throw new Error("O link do roteiro chegou alterado. Peça para reenviar a mensagem.");
+  }
+  let json: string;
+  try { json = await inflar(bytes); }
+  catch (e) {
+    if ((e as Error).message.startsWith("Este navegador")) throw e;
+    throw new Error("O roteiro chegou cortado ou com defeito. Peça para reenviar a mensagem.");
+  }
+  try { j = JSON.parse(json); }
   catch { throw new Error("O roteiro chegou cortado ou com defeito. Peça para reenviar a mensagem."); }
   if (j.app !== APP || !Array.isArray(j.eventos) || typeof j.em !== "string")
     throw new Error("Esse link não é um roteiro do planejador da viagem.");
