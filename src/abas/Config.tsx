@@ -7,7 +7,7 @@ import { CartaoBackup } from "../comp/Backup";
 import { useVersaoDados } from "../db/mudancas";
 import { useEspacoFotos } from "../db/fotos";
 import { tamanho } from "../lib/imagem";
-import { t, idioma, IDIOMAS, mudarIdioma } from "../lib/i18n";
+import { t, tn, idioma, IDIOMAS, mudarIdioma } from "../lib/i18n";
 import { temaAtual, mudarTema, type Tema } from "../lib/tema";
 
 /* Trip settings. Everything saves on its own when a field is committed
@@ -23,7 +23,7 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
 
   const versao = useVersaoDados();
   useEffect(() => { diasDaViagem(viagem).then(setDias); }, [viagem, versao]);
-  useEffect(() => { if (msg) { const t = setTimeout(() => setMsg(""), 1800); return () => clearTimeout(t); } }, [msg]);
+  useEffect(() => { if (msg) { const id = setTimeout(() => setMsg(""), 1800); return () => clearTimeout(id); } }, [msg]);
 
   const datasOk = !!v.inicio && !!v.fim && v.fim >= v.inicio && diferencaDias(v.inicio, v.fim) <= 120;
 
@@ -31,7 +31,7 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
     if (!(nova.inicio && nova.fim && nova.fim >= nova.inicio)) return;
     await salvarViagem(nova);
     aoSalvar({ ...nova });
-    setMsg("✓ Salvo");
+    setMsg(t("✓ Salvo"));
   }
   const campo = (k: keyof Viagem) => ({
     value: v[k] as string,
@@ -44,7 +44,7 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
     const novo = { ...d, cidade: valor.trim() };
     await salvarDia(novo);
     setDias((l) => l.map((x) => (x.id === d.id ? novo : x)));
-    setMsg("✓ Salvo");
+    setMsg(t("✓ Salvo"));
   }
 
   return (
@@ -53,25 +53,25 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
       <CartaoBackup />
 
       <div class="cartao">
-        <h2>Viagem</h2>
-        <div class="campo"><label for="c-nome">Nome da viagem</label><input id="c-nome" {...campo("nome")} /></div>
-        <div class="campo"><label for="c-viaj">Viajante</label><input id="c-viaj" placeholder="Seu nome" {...campo("viajante")} /></div>
+        <h2>{t("Viagem")}</h2>
+        <div class="campo"><label for="c-nome">{t("Nome da viagem")}</label><input id="c-nome" {...campo("nome")} /></div>
+        <div class="campo"><label for="c-viaj">{t("Viajante")}</label><input id="c-viaj" placeholder={t("Seu nome")} {...campo("viajante")} /></div>
         <div class="linha2">
-          <div class="campo"><label for="c-ini">Início</label><input id="c-ini" type="date" {...campo("inicio")} /></div>
-          <div class="campo"><label for="c-fim">Fim</label><input id="c-fim" type="date" {...campo("fim")} /></div>
+          <div class="campo"><label for="c-ini">{t("Início")}</label><input id="c-ini" type="date" {...campo("inicio")} /></div>
+          <div class="campo"><label for="c-fim">{t("Fim")}</label><input id="c-fim" type="date" {...campo("fim")} /></div>
         </div>
-        {!datasOk && <p class="pequeno" style="color:var(--aviso);margin:0">O fim precisa ser no mesmo dia ou depois do início.</p>}
+        {!datasOk && <p class="pequeno" style="color:var(--aviso);margin:0">{t("O fim precisa ser no mesmo dia ou depois do início.")}</p>}
       </div>
 
       <div class="cartao">
-        <h2>Cidade de cada dia</h2>
-        <p class="muted pequeno" style="margin:-4px 0 8px">Serve para planejar as roupas de acordo com o lugar.</p>
+        <h2>{t("Cidade de cada dia")}</h2>
+        <p class="muted pequeno" style="margin:-4px 0 8px">{t("Serve para planejar as roupas de acordo com o lugar.")}</p>
         {dias.map((d) => {
           const [, m, dd] = d.data.split("-");
           return (
             <div class="dia" key={d.id}>
               <div class="quando"><b>{+dd}/{m}</b><span class="muted">{diaSemana(d.data)}</span></div>
-              <input aria-label={`Cidade em ${dd}/${m}`} value={d.cidade} placeholder="Cidade"
+              <input aria-label={t("Cidade em {d}", { d: `${dd}/${m}` })} value={d.cidade} placeholder={t("Cidade")}
                 onChange={(e) => cidade(d, (e.target as HTMLInputElement).value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()} />
             </div>
@@ -82,15 +82,13 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
       <ImportarPlanner />
 
       <div class="cartao">
-        <h2>Seus dados</h2>
+        <h2>{t("Seus dados")}</h2>
         <p class="pequeno muted" style="margin:0">
-          Tudo fica guardado <b>só neste aparelho</b>, ligado ao endereço do site. Use sempre o mesmo link
-          publicado (o do GitHub Pages) — o que você digitar em outro endereço fica em outro lugar.
-          As fotos nunca saem do celular.
+          {t("Tudo fica guardado só neste aparelho, ligado ao endereço do site. Use sempre o mesmo link publicado (o do GitHub Pages) — o que você digitar em outro endereço fica em outro lugar. As fotos nunca saem do celular.")}
         </p>
-        <p class="pequeno muted" style="margin:10px 0 0">Versão do app: <b>{__VERSAO__}</b></p>
-        <p class="pequeno" style="margin:10px 0 0">📷 <b>{fotos.n}</b> {fotos.n === 1 ? "foto" : "fotos"} · <b>{tamanho(fotos.bytes)}</b>
-          {livre && <span class="muted"> · {livre} livres para o app</span>}</p>
+        <p class="pequeno muted" style="margin:10px 0 0">{t("Versão do app:")} <b>{__VERSAO__}</b></p>
+        <p class="pequeno" style="margin:10px 0 0">📷 {tn(fotos.n, "{n} foto", "{n} fotos")} · <b>{tamanho(fotos.bytes)}</b>
+          {livre && <span class="muted"> · {t("{tam} livres para o app", { tam: livre })}</span>}</p>
       </div>
       {msg && <div class="toast">{msg}</div>}
     </>

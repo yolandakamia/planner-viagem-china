@@ -2,6 +2,7 @@ import { useRef, useState } from "preact/hooks";
 import { lerBackup, deBackup } from "../lib/importarPlanner";
 import type { RoteiroRecebido } from "../lib/grupo";
 import { quandoRoteiro } from "../lib/roteiro";
+import { t } from "../lib/i18n";
 import { useRoteiroAtual, useColarRoteiro, useCompartilharRoteiro, ReceberRoteiro } from "./Roteiro";
 
 /* Card in Ajustes: the group itinerary on this phone — paste one, send one,
@@ -27,22 +28,21 @@ export function ImportarPlanner() {
 
   return (
     <div class="cartao">
-      <h2>Roteiro do grupo</h2>
+      <h2>{t("Roteiro do grupo")}</h2>
       <p class="pequeno" style="margin:-4px 0 8px">
-        {atual === undefined ? "…" : atual ? <>📌 Último recebido: <b>{quandoRoteiro(atual.em)}</b>
-          <span class="muted"> · {atual.de && atual.de !== "planejador" ? `enviado por ${atual.de}` : "do planejador"}</span></> : <b>Nenhum roteiro recebido ainda.</b>}
+        {atual === undefined ? "…" : atual ? <>📌 {t("Último recebido:")} <b>{quandoRoteiro(atual.em)}</b>
+          <span class="muted"> · {atual.de && atual.de !== "planejador" ? t("enviado por {nome}", { nome: atual.de }) : t("do planejador")}</span></> : <b>{t("Nenhum roteiro recebido ainda.")}</b>}
       </p>
       <p class="muted pequeno" style="margin:0 0 10px">
-        O roteiro do grupo (👥) vai e vem por mensagem (WhatsApp ou WeChat). Toque no link, ou copie a mensagem e use <b>Colar roteiro</b>.
-        Cada roteiro recebido se junta ao seu, evento por evento. Seus eventos pessoais (👤) nunca vão nem mudam.
+        {t("O roteiro do grupo (👥) vai e vem por mensagem (WhatsApp ou WeChat). Toque no link, ou copie a mensagem e use Colar roteiro. Cada roteiro recebido se junta ao seu, evento por evento. Seus eventos pessoais (👤) nunca vão nem mudam.")}
       </p>
       <div class="linha2">
-        <button class="btn primario" onClick={colar}>📋 Colar roteiro</button>
-        <button class="btn" onClick={env.abrir}>📤 Enviar roteiro</button>
+        <button class="btn primario" onClick={colar}>{t("📋 Colar roteiro")}</button>
+        <button class="btn" onClick={env.abrir}>{t("📤 Enviar roteiro")}</button>
       </div>
       {elemento}{env.elemento}
       <input ref={arq} type="file" accept=".json,application/json" hidden onChange={escolher} />
-      <button class="btn" style="width:100%;margin-top:8px" onClick={() => arq.current?.click()}>Importar o Backup .json do planejador…</button>
+      <button class="btn" style="width:100%;margin-top:8px" onClick={() => arq.current?.click()}>{t("Importar o Backup .json do planejador…")}</button>
       {erro && <p class="pequeno" style="color:var(--aviso)">{erro}</p>}
       {r && <ReceberRoteiro recebido={r} aoFechar={() => setR(null)} />}
     </div>

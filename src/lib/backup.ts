@@ -13,6 +13,7 @@ import { zipSync, unzipSync, strToU8, strFromU8 } from "fflate";
 import { abrirBanco, DB_VERSION } from "../db/banco";
 import type { Viagem, Dia, Evento, Mala, Item, Look, Foto, Meta } from "../db/tipos";
 import { avisarMudanca } from "../db/mudancas";
+import { t } from "./i18n";
 
 const APP = "viagem-china";
 const FORMATO = 1;
@@ -94,19 +95,19 @@ const ehLista = (x: unknown): x is { id: string }[] => Array.isArray(x) && x.eve
 export async function lerBackup(arq: Blob): Promise<BackupLido> {
   let arquivos: Record<string, Uint8Array>;
   try { arquivos = unzipSync(new Uint8Array(await arq.arrayBuffer())); }
-  catch { return erro("Esse arquivo não é um .zip válido."); }
-  if (!arquivos["manifesto.json"] || !arquivos["dados.json"]) erro("Esse .zip não é um backup do app da viagem.");
+  catch { return erro(t("Esse arquivo não é um .zip válido.")); }
+  if (!arquivos["manifesto.json"] || !arquivos["dados.json"]) erro(t("Esse .zip não é um backup do app da viagem."));
   let manifesto: Manifesto, dados: Dados;
   try { manifesto = JSON.parse(strFromU8(arquivos["manifesto.json"])); dados = JSON.parse(strFromU8(arquivos["dados.json"])); }
-  catch { return erro("O backup está corrompido (não consegui ler os dados)."); }
-  if (manifesto.app !== APP || manifesto.formato !== FORMATO) erro("Esse .zip não é um backup do app da viagem.");
-  if (manifesto.schemaVersion > DB_VERSION) erro("Esse backup foi feito por uma versão mais nova do app. Atualize o app e tente de novo.");
+  catch { return erro(t("O backup está corrompido (não consegui ler os dados).")); }
+  if (manifesto.app !== APP || manifesto.formato !== FORMATO) erro(t("Esse .zip não é um backup do app da viagem."));
+  if (manifesto.schemaVersion > DB_VERSION) erro(t("Esse backup foi feito por uma versão mais nova do app. Atualize o app e tente de novo."));
   for (const s of [...STORES, "fotos"] as const)
-    if (!ehLista((dados as unknown as Record<string, unknown>)[s])) erro(`O backup está incompleto ou corrompido (${s}).`);
+    if (!ehLista((dados as unknown as Record<string, unknown>)[s])) erro(t("O backup está incompleto ou corrompido ({parte}).", { parte: s }));
   if (dados.dias.some((d) => !/^\d{4}-\d{2}-\d{2}$/.test(d.data)) || dados.eventos.some((e) => !/^\d{4}-\d{2}-\d{2}$/.test(e.data)))
-    erro("O backup tem datas inválidas.");
+    erro(t("O backup tem datas inválidas."));
   const faltam = dados.fotos.filter((f) => !arquivos[f.arquivo] || !arquivos[f.arquivoMini]);
-  if (faltam.length) erro(`Faltam ${faltam.length} fotos dentro do .zip.`);
+  if (faltam.length) erro(t("Faltam {n} fotos dentro do .zip.", { n: faltam.length }));
   return { manifesto, dados, arquivos };
 }
 

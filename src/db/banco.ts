@@ -2,6 +2,7 @@ import { openDB, type DBSchema, type IDBPDatabase, type IDBPTransaction, type St
 import type { Meta, Viagem, Dia, Evento, Mala, Item, Foto, Look } from "./tipos";
 import { MALAS_PADRAO, ITENS_SUGERIDOS } from "./sugestoes";
 import { uuid } from "../lib/uuid";
+import { t } from "../lib/i18n";
 
 /* ------------------------------------------------------------------
    IndexedDB "viagem-china", versioned schema.
@@ -92,7 +93,7 @@ export function abrirBanco(): Promise<Banco> {
       },
       blocked() {
         // another tab still has the old version open
-        alert("Feche as outras abas do app para concluir a atualização dos dados.");
+        alert(t("Feche as outras abas do app para concluir a atualização dos dados."));
       },
       blocking() {
         // a newer version wants to upgrade: let it

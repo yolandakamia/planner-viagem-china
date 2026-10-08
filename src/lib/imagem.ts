@@ -3,6 +3,8 @@
    transparency, plus a thumbnail. Background removal is NOT done here:
    photos arrive already cut out (iPhone / Android "copy subject"). */
 
+import { t } from "./i18n";
+
 export const LADO_MAX = 800;
 export const LADO_MINI = 240;
 const LADO_TRABALHO = 1600;      // decode big photos down to this first (memory on phones)
@@ -52,7 +54,7 @@ function caixaVisivel(g: CanvasRenderingContext2D, w: number, h: number) {
 export function codificar(c: HTMLCanvasElement, qualidade: number): Promise<Blob> {
   return new Promise((ok, erro) => c.toBlob((b) => {
     if (b && b.type === "image/webp") return ok(b);
-    c.toBlob((p) => (p ? ok(p) : erro(new Error("Não consegui gerar a imagem."))), "image/png");
+    c.toBlob((p) => (p ? ok(p) : erro(new Error(t("Não consegui gerar a imagem.")))), "image/png");
   }, "image/webp", qualidade));
 }
 
@@ -65,16 +67,16 @@ export function reduzir(origem: HTMLCanvasElement, lado: number) {
 }
 
 export async function processarImagem(arq: Blob): Promise<ImagemPronta> {
-  if (!arq.type.startsWith("image/") && arq.type !== "") throw new Error("Esse arquivo não é uma imagem.");
+  if (!arq.type.startsWith("image/") && arq.type !== "") throw new Error(t("Esse arquivo não é uma imagem."));
   const img = await decodificar(arq);
   // 1. find the visible area on a small copy (fast, light on memory)…
   const k = Math.min(1, LADO_TRABALHO / Math.max(img.width, img.height));
   const W = Math.max(1, Math.round(img.width * k)), H = Math.max(1, Math.round(img.height * k));
-  const t = canvas(W, H);
-  t.g.drawImage(img, 0, 0, W, H);
-  const caixa = caixaVisivel(t.g, W, H);
-  t.c.width = t.c.height = 0;
-  if (!caixa) throw new Error("A imagem está toda transparente.");
+  const pq = canvas(W, H);
+  pq.g.drawImage(img, 0, 0, W, H);
+  const caixa = caixaVisivel(pq.g, W, H);
+  pq.c.width = pq.c.height = 0;
+  if (!caixa) throw new Error(t("A imagem está toda transparente."));
   // 2. …then cut it from the ORIGINAL, so trimming never costs resolution
   //    (an opaque photo has no empty border and keeps its frame)
   const margem = Math.max(caixa.w, caixa.h) * 0.02;

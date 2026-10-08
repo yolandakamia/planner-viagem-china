@@ -6,6 +6,7 @@
 import { abrirBanco } from "../db/banco";
 import type { Meta } from "../db/tipos";
 import type { EvRoteiro, RoteiroRecebido } from "./grupo";
+import { t } from "./i18n";
 
 interface OpcaoPlanner { id: string; nome: string; eventos: EvRoteiro[]; dias: Record<string, { cidade?: string }> }
 export interface BackupPlanner { cenarios: OpcaoPlanner[]; cenPrincipal?: string }
@@ -13,10 +14,10 @@ export interface BackupPlanner { cenarios: OpcaoPlanner[]; cenPrincipal?: string
 /* reads and checks the file; throws a message in Portuguese when it is not a planner backup */
 export function lerBackup(texto: string): BackupPlanner {
   let j: unknown;
-  try { j = JSON.parse(texto); } catch { throw new Error("O arquivo não é um JSON válido."); }
+  try { j = JSON.parse(texto); } catch { throw new Error(t("O arquivo não é um JSON válido.")); }
   const b = j as BackupPlanner;
   if (!b || !Array.isArray(b.cenarios) || !b.cenarios.length || !b.cenarios.every((c) => Array.isArray(c?.eventos)))
-    throw new Error("Esse arquivo não parece o Backup .json do China_Trip_Planner.");
+    throw new Error(t("Esse arquivo não parece o Backup .json do China_Trip_Planner."));
   return b;
 }
 

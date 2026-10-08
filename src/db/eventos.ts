@@ -4,15 +4,16 @@ import { uuid, agoraISO } from "../lib/uuid";
 import { FUSO_CHINA } from "../lib/datas";
 import { avisarMudanca } from "./mudancas";
 import { marcarPendente, anotarExclusao } from "../lib/grupo";
+import { t } from "../lib/i18n";
 export { useVersaoDados } from "./mudancas";
 
 export const TIPOS: Record<TipoEvento, { rot: string; emo: string }> = {
-  feira:        { rot: "Feira",            emo: "🎪" },
-  reuniao:      { rot: "Reunião / visita", emo: "🤝" },
-  deslocamento: { rot: "Deslocamento",     emo: "🚗" },
-  refeicao:     { rot: "Refeição",         emo: "🍽️" },
-  livre:        { rot: "Livre",            emo: "☕" },
-  outro:        { rot: "Outro",            emo: "📌" },
+  feira:        { rot: t("Feira"),            emo: "🎪" },
+  reuniao:      { rot: t("Reunião / visita"), emo: "🤝" },
+  deslocamento: { rot: t("Deslocamento"),     emo: "🚗" },
+  refeicao:     { rot: t("Refeição"),         emo: "🍽️" },
+  livre:        { rot: t("Livre"),            emo: "☕" },
+  outro:        { rot: t("Outro"),            emo: "📌" },
 };
 
 export function novoEvento(data: string, fuso = FUSO_CHINA): Evento {
@@ -67,7 +68,7 @@ export async function excluirEvento(id: string): Promise<void> {
 }
 /* a copy ready for the editor — only saved if the user taps Salvar */
 export function copiaDeEvento(e: Evento): Evento {
-  const t = agoraISO();
+  const agora = agoraISO();
   return { ...e, id: uuid(), camada: "pessoal", origemId: null, ref: null, editadoEm: undefined, autor: undefined,
-    titulo: e.titulo + " (cópia)", criadoEm: t, atualizadoEm: t };
+    titulo: e.titulo + " " + t("(cópia)"), criadoEm: agora, atualizadoEm: agora };
 }

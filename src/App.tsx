@@ -11,15 +11,16 @@ import { MalaAba } from "./abas/Mala";
 import { LooksAba } from "./abas/Looks";
 import { ReceberRoteiro } from "./comp/Roteiro";
 import { temRoteiro } from "./lib/roteiro";
+import { t } from "./lib/i18n";
 
 /* Tabs live in the hash (#/hoje …): no server routing needed on GitHub Pages,
    and the Android back button moves between tabs. */
 const ABAS = [
-  { id: "hoje", rot: "Hoje", Icone: IconeHoje },
-  { id: "calendario", rot: "Calendário", Icone: IconeCalendario },
-  { id: "mala", rot: "Mala", Icone: IconeMala },
-  { id: "looks", rot: "Looks", Icone: IconeLooks },
-  { id: "config", rot: "Ajustes", Icone: IconeConfig },
+  { id: "hoje", rot: t("Hoje"), Icone: IconeHoje },
+  { id: "calendario", rot: t("Calendário"), Icone: IconeCalendario },
+  { id: "mala", rot: t("Mala"), Icone: IconeMala },
+  { id: "looks", rot: t("Looks"), Icone: IconeLooks },
+  { id: "config", rot: t("Ajustes"), Icone: IconeConfig },
 ] as const;
 type IdAba = (typeof ABAS)[number]["id"];
 
@@ -51,7 +52,7 @@ export function App() {
     pedirArmazenamentoPersistente();
   }, []);
 
-  if (erro) return <div class="conteudo"><div class="cartao"><h2>Não consegui abrir os dados</h2><p>{erro}</p></div></div>;
+  if (erro) return <div class="conteudo"><div class="cartao"><h2>{t("Não consegui abrir os dados")}</h2><p>{erro}</p></div></div>;
   if (!viagem) return null;
 
   const tit = ABAS.find((a) => a.id === aba)!.rot;
@@ -96,17 +97,17 @@ function AvisoAtualizacao() {
     },
   });
   useEffect(() => {
-    if (pronto) { const t = setTimeout(() => setPronto(false), 4000); return () => clearTimeout(t); }
+    if (pronto) { const tm = setTimeout(() => setPronto(false), 4000); return () => clearTimeout(tm); }
   }, [pronto]);
 
   if (precisa) {
     return (
       <button class="aviso-versao" onClick={() => updateServiceWorker(true)}>
         <span style="font-size:20px">⬆️</span>
-        <span>Nova versão disponível – toque para atualizar</span>
+        <span>{t("Nova versão disponível – toque para atualizar")}</span>
       </button>
     );
   }
-  if (pronto) return <div class="toast">✓ Pronto para usar offline</div>;
+  if (pronto) return <div class="toast">{t("✓ Pronto para usar offline")}</div>;
   return null;
 }

@@ -6,6 +6,7 @@ import { useFotoUrl } from "../db/fotos";
 import { codificar, reduzir } from "../lib/imagem";
 import { dataCurta } from "../lib/datas";
 import { uuid } from "../lib/uuid";
+import { t } from "../lib/i18n";
 
 /* Fitting room. Konva is loaded only here (dynamic import), bundled with
    the app — nothing comes from a CDN.
@@ -27,9 +28,9 @@ function carregarKonva() {
   konvaPromessa ??= Promise.all([
     import("konva/lib/Core"), import("konva/lib/Stage"), import("konva/lib/Layer"),
     import("konva/lib/shapes/Image"), import("konva/lib/shapes/Transformer"),
-  ]).then(([c, s, l, i, t]) => {
+  ]).then(([c, s, l, i, tf]) => {
     c.default.hitOnDragEnabled = true;   // a second finger can start a pinch mid-drag
-    return { Konva: c.default, Stage: s.Stage, Layer: l.Layer, Img: i.Image, Transformer: t.Transformer };
+    return { Konva: c.default, Stage: s.Stage, Layer: l.Layer, Img: i.Image, Transformer: tf.Transformer };
   });
   return konvaPromessa;
 }
@@ -48,7 +49,7 @@ export function Provador({ inicial, itens, dia, eventos, aoFechar }: {
   const modelo = useRef(pecas); modelo.current = pecas;
   const [hist, setHist] = useState<Peca[][]>([]);
   const [sel, setSel] = useState<string | null>(null);
-  const [nome, setNome] = useState(inicial.nome || (dia ? `Look de ${dataCurta(dia.data)}` : ""));
+  const [nome, setNome] = useState(inicial.nome || (dia ? t("Look de {dia}", { dia: dataCurta(dia.data) }) : ""));
   const [fav, setFav] = useState(inicial.favorito);
   const [filtro, setFiltro] = useState("");
   const [mexeu, setMexeu] = useState(false);
@@ -243,65 +244,65 @@ export function Provador({ inicial, itens, dia, eventos, aoFechar }: {
     const c = document.createElement("canvas"); c.width = cena.width; c.height = cena.height;
     const g = c.getContext("2d")!; g.fillStyle = COR_FUNDO; g.fillRect(0, 0, c.width, c.height); g.drawImage(cena, 0, 0);
     const [blob, miniatura] = await Promise.all([codificar(c, 0.85), codificar(reduzir(c, 240), 0.8)]);
-    const look = await salvarLook({ ...inicial, nome: nome.trim() || "Look sem nome", favorito: fav,
+    const look = await salvarLook({ ...inicial, nome: nome.trim() || t("Look sem nome"), favorito: fav,
       pecas: pecas.map(({ k: _k, ...p }) => p) }, { blob, miniatura, largura: c.width, altura: c.height });
     if (dia) await definirLookDoDia(dia, look.id);
     void H;
     aoFechar();
   }
   function fechar() {
-    if (mexeu && !confirm("Sair sem salvar o look?")) return;
+    if (mexeu && !confirm(t("Sair sem salvar o look?"))) return;
     aoFechar();
   }
 
   return (
-    <div class="provador" role="dialog" aria-label="Montar look">
+    <div class="provador" role="dialog" aria-label={t("Montar look")}>
       <div class="pv-topo">
-        <button class="btn-icone" aria-label="Fechar" onClick={fechar}>✕</button>
-        <input class="pv-nome" value={nome} placeholder="Nome do look" aria-label="Nome do look" onInput={(e) => { setNome((e.target as HTMLInputElement).value); setMexeu(true); }} />
-        <button class={`btn-icone ${fav ? "fav-on" : ""}`} aria-label={fav ? "Tirar dos favoritos" : "Favoritar"} aria-pressed={fav} onClick={() => { setFav(!fav); setMexeu(true); }}>{fav ? "★" : "☆"}</button>
-        <button class="btn primario" disabled={!pecas.length || salvando} onClick={salvar}>{salvando ? "…" : "Salvar"}</button>
+        <button class="btn-icone" aria-label={t("Fechar")} onClick={fechar}>✕</button>
+        <input class="pv-nome" value={nome} placeholder={t("Nome do look")} aria-label={t("Nome do look")} onInput={(e) => { setNome((e.target as HTMLInputElement).value); setMexeu(true); }} />
+        <button class={`btn-icone ${fav ? "fav-on" : ""}`} aria-label={fav ? t("Tirar dos favoritos") : t("Favoritar")} aria-pressed={fav} onClick={() => { setFav(!fav); setMexeu(true); }}>{fav ? "★" : "☆"}</button>
+        <button class="btn primario" disabled={!pecas.length || salvando} onClick={salvar}>{salvando ? "…" : t("Salvar")}</button>
       </div>
 
       <div class="pv-meio">
         {dia && (
           <aside class={`pv-agenda ${verAgenda ? "" : "fechada"}`}>
             <button class="pv-agenda-tit" onClick={() => setVerAgenda(!verAgenda)} aria-expanded={verAgenda}>
-              <b>{dataCurta(dia.data)}</b> · {dia.cidade || "cidade não definida"} <span class="muted">{verAgenda ? "▴" : "▾"}</span>
+              <b>{dataCurta(dia.data)}</b> · {dia.cidade || t("cidade não definida")} <span class="muted">{verAgenda ? "▴" : "▾"}</span>
             </button>
             {verAgenda && (eventos?.length
-              ? <ul>{eventos.map((e) => <li><span class="pv-h">{e.horaInicio || "dia"}</span> {e.titulo}</li>)}</ul>
-              : <p class="muted pequeno" style="margin:4px 0 0">Nada na agenda.</p>)}
+              ? <ul>{eventos.map((e) => <li><span class="pv-h">{e.horaInicio || t("dia")}</span> {e.titulo}</li>)}</ul>
+              : <p class="muted pequeno" style="margin:4px 0 0">{t("Nada na agenda.")}</p>)}
           </aside>)}
 
         <div class="pv-palco-env">
           <div class="pv-palco" ref={caixa} />
           {!pronto && <div class="pv-carregando"><span class="giro" /></div>}
-          {pronto && !pecas.length && <div class="pv-vazio">Toque numa peça abaixo, ou arraste para cá.</div>}
+          {pronto && !pecas.length && <div class="pv-vazio">{t("Toque numa peça abaixo, ou arraste para cá.")}</div>}
         </div>
       </div>
 
       <div class="pv-acoes">
-        <button class="btn btn-peq" disabled={!hist.length} onClick={desfazer}>↶ Desfazer</button>
-        <button class="btn btn-peq" disabled={idx < 0} onClick={frente}>Frente</button>
-        <button class="btn btn-peq" disabled={idx < 0} onClick={tras}>Trás</button>
-        <button class="btn btn-peq" disabled={idx < 0} onClick={remover}>Remover</button>
+        <button class="btn btn-peq" disabled={!hist.length} onClick={desfazer}>{t("↶ Desfazer")}</button>
+        <button class="btn btn-peq" disabled={idx < 0} onClick={frente}>{t("Frente")}</button>
+        <button class="btn btn-peq" disabled={idx < 0} onClick={tras}>{t("Trás")}</button>
+        <button class="btn btn-peq" disabled={idx < 0} onClick={remover}>{t("Remover")}</button>
       </div>
 
       <div class="pv-barra">
         {subcats.length > 1 && (
           <div class="pv-filtros">
-            <button class={`chip ${!filtro ? "on" : ""}`} onClick={() => setFiltro("")}>Todas</button>
+            <button class={`chip ${!filtro ? "on" : ""}`} onClick={() => setFiltro("")}>{t("Todas")}</button>
             {subcats.map((s) => <button class={`chip ${filtro === s ? "on" : ""}`} onClick={() => setFiltro(s)}>{s}</button>)}
           </div>)}
         <div class="pv-pecas">
           {naBarra.map((it) => (
-            <button class="pv-peca xadrez" title={it.nome} aria-label={`Adicionar ${it.nome}`}
+            <button class="pv-peca xadrez" title={it.nome} aria-label={t("Adicionar {nome}", { nome: it.nome })}
               onPointerDown={(e) => inicioArrasto(e, it)} onPointerMove={moveArrasto} onPointerUp={fimArrasto}
               onPointerCancel={() => { arrasto.current?.fant?.remove(); arrasto.current = null; }}>
               <MiniPeca fotoId={it.fotoId} />
             </button>))}
-          {!comFoto.length && <p class="muted pequeno" style="padding:8px">Nenhuma peça com foto ainda. Na aba Mala, abra uma roupa e adicione a foto.</p>}
+          {!comFoto.length && <p class="muted pequeno" style="padding:8px">{t("Nenhuma peça com foto ainda. Na aba Mala, abra uma roupa e adicione a foto.")}</p>}
         </div>
       </div>
     </div>

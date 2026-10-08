@@ -16,6 +16,11 @@
    Merging rules: lib/grupo.ts. */
 import { inflateSync, deflateSync, strFromU8, strToU8 } from "fflate";
 import type { RoteiroRecebido, EvRoteiro } from "./grupo";
+import { t } from "./i18n";
+import { SEMANA_CURTA } from "./datas";
+
+/* the link was cut short: its message is already the one to show */
+class Cortado extends Error {}
 
 const APP = "viagem-china-roteiro";
 const RE = /roteiro=([A-Za-z0-9_-]{20,})/;
@@ -51,7 +56,7 @@ function decodificar(codigo: string): Uint8Array<ArrayBuffer> {
   }
   const bytes = deBase32(m[2]), esperado = +m[1];
   if (bytes.length < esperado)
-    throw new Error(`O link chegou cortado (${Math.round((bytes.length / esperado) * 100)}% do roteiro). Peça para reenviar, ou copie a mensagem inteira e use "Colar roteiro".`);
+    throw new Cortado(t("O link chegou cortado ({p}% do roteiro). Peça para reenviar, ou copie a mensagem inteira e use \"Colar roteiro\".", { p: Math.round((bytes.length / esperado) * 100) }));
   return bytes.subarray(0, esperado);
 }
 
@@ -65,7 +70,7 @@ function inflar(bytes: Uint8Array): string {
 export function diagnostico(texto: string): string {
   const m = RE.exec(texto), c = m?.[1] ?? "";
   const b = /^B(\d+)L([a-z2-7]*)/.exec(c);
-  const partes = [`app ${__VERSAO__}`, `código ${c.length}`];
+  const partes = [`app ${__VERSAO__}`, t("código {n}", { n: c.length })];
   if (b) partes.push(`esperado ${b[1]} bytes, chegou ${Math.floor((b[2].length * 5) / 8)}`, `resto "${c.slice(2 + b[1].length + b[2].length, 2 + b[1].length + b[2].length + 12)}"`);
   else partes.push(`formato ${c ? "antigo" : "nenhum"}`);
   partes.push(`início "${c.slice(0, 14)}" fim "${c.slice(-10)}"`, `texto ${texto.length}`);
@@ -76,22 +81,22 @@ export function diagnostico(texto: string): string {
    throws a message in Portuguese */
 export async function lerRoteiro(texto: string): Promise<RoteiroRecebido> {
   const m = RE.exec(texto);
-  if (!m) throw new Error("Não encontrei nenhum roteiro nesse texto. Copie a mensagem inteira (com o link) e tente de novo.");
+  if (!m) throw new Error(t("Não encontrei nenhum roteiro nesse texto. Copie a mensagem inteira (com o link) e tente de novo."));
   let j: { app?: string; v?: number; em?: string; de?: string; plano?: string; eventos?: unknown; excluidos?: unknown; dias?: unknown };
   let bytes: Uint8Array<ArrayBuffer>;
   try { bytes = decodificar(m[1]); }
   catch (e) {
-    if ((e as Error).message.startsWith("O link")) throw e;
-    throw new Error("O link do roteiro chegou alterado. Peça para reenviar a mensagem.");
+    if (e instanceof Cortado) throw e;
+    throw new Error(t("O link do roteiro chegou alterado. Peça para reenviar a mensagem."));
   }
   let json: string;
   try { json = inflar(bytes); }
-  catch { throw new Error("O roteiro chegou com defeito (não consegui descompactar). Peça para reenviar a mensagem."); }
+  catch { throw new Error(t("O roteiro chegou com defeito (não consegui descompactar). Peça para reenviar a mensagem.")); }
   try { j = JSON.parse(json); }
-  catch { throw new Error("O roteiro chegou com defeito (dados ilegíveis). Peça para reenviar a mensagem."); }
+  catch { throw new Error(t("O roteiro chegou com defeito (dados ilegíveis). Peça para reenviar a mensagem.")); }
   if (j.app !== APP || !Array.isArray(j.eventos) || typeof j.em !== "string")
-    throw new Error("Esse link não é um roteiro do planejador da viagem.");
-  if ((j.v ?? 0) > 2) throw new Error("Esse roteiro foi feito por uma versão mais nova. Atualize o app (com internet) e tente de novo.");
+    throw new Error(t("Esse link não é um roteiro do planejador da viagem."));
+  if ((j.v ?? 0) > 2) throw new Error(t("Esse roteiro foi feito por uma versão mais nova. Atualize o app (com internet) e tente de novo."));
   return {
     em: j.em, plano: typeof j.plano === "string" ? j.plano : "", de: typeof j.de === "string" ? j.de : "planejador",
     eventos: j.eventos as EvRoteiro[],
@@ -113,9 +118,10 @@ function base32(u: Uint8Array): string {
 export function montarMensagem(r: { eventos: EvRoteiro[]; excluidos: { ref: string; em: string }[]; nome: string; plano: string }, agora = new Date()): string {
   const bytes = deflateSync(strToU8(JSON.stringify({ app: APP, v: 2, em: agora.toISOString(), de: r.nome || "celular",
     plano: r.plano, eventos: r.eventos, excluidos: r.excluidos })), { level: 9 });
-  return "🇨🇳 *Roteiro da viagem* — versão de " + quandoRoteiro(agora.toISOString()) + (r.nome ? " · por " + r.nome : "") + "\n\n"
-    + "Toque no link para atualizar o app.\n"
-    + "📱 iPhone: copie esta mensagem inteira, abra o app e toque em \"📋 Colar roteiro\".\n\n"
+  return t("🇨🇳 *Roteiro da viagem* — versão de {quando}", { quando: quandoRoteiro(agora.toISOString()) })
+    + (r.nome ? t(" · por {nome}", { nome: r.nome }) : "") + "\n\n"
+    + t("Toque no link para atualizar o app.") + "\n"
+    + t("📱 iPhone: copie esta mensagem inteira, abra o app e toque em \"📋 Colar roteiro\".") + "\n\n"
     + URL_APP + "#roteiro=B" + bytes.length + "L" + base32(bytes);
 }
 
@@ -123,7 +129,7 @@ export function montarMensagem(r: { eventos: EvRoteiro[]; excluidos: { ref: stri
 export function quandoRoteiro(iso: string): string {
   const d = new Date(iso);
   const p = (n: number) => String(n).padStart(2, "0");
-  return `${["dom", "seg", "ter", "qua", "qui", "sex", "sáb"][d.getDay()]} ${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  return `${SEMANA_CURTA[d.getDay()]} ${p(d.getDate())}/${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
 export const ehIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);

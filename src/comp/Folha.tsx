@@ -1,5 +1,6 @@
 import type { ComponentChildren } from "preact";
 import { useEffect } from "preact/hooks";
+import { t } from "../lib/i18n";
 
 /* Bottom sheet: slides up from the bottom on a phone (thumb reach),
    centred card on a wide screen. Esc or a tap on the backdrop closes. */
@@ -17,7 +18,7 @@ export function Folha({ titulo, aoFechar, children, rodape }: {
       <div class="folha" role="dialog" aria-modal="true" aria-label={titulo}>
         <div class="folha-topo">
           <h2>{titulo}</h2>
-          <button class="btn-icone" aria-label="Fechar" onClick={aoFechar}>✕</button>
+          <button class="btn-icone" aria-label={t("Fechar")} onClick={aoFechar}>✕</button>
         </div>
         <div class="folha-corpo">{children}</div>
         {rodape && <div class="folha-rodape">{rodape}</div>}

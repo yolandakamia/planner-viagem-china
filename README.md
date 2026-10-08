@@ -12,7 +12,16 @@ no celular, funciona **100% offline**.
 | **Calendário** | Dia, Semana (com horários), Mês ou a viagem inteira; eventos 👥 do grupo e 👤 pessoais; criar, editar, duplicar e excluir eventos; conflitos de horário; endereço em chinês em tela cheia |
 | **Mala** | Malas com peso e limite, itens com status e foto, lista sugerida para a China, modo volta (compras, amostras, catálogos) |
 | **Looks** | Provador com as fotos das roupas, looks por dia, contagem de uso das peças e dias de lavanderia |
-| **Ajustes** | Backup, dados da viagem, cidade de cada dia, roteiro da viagem (colar ou importar do `China_Trip_Planner.html`) |
+| **Ajustes** | Tema (automático, claro, escuro), idioma (Português, English, 中文), backup, dados da viagem, cidade de cada dia, roteiro do grupo |
+
+## Tema e idioma
+
+- **Ajustes → Aparência e idioma.** Tema: Automático (segue o celular), Claro ou Escuro. Idioma: Português,
+  English ou 中文 (chinês simplificado). A escolha é de cada celular.
+- O idioma muda os textos do app e as datas. O que vocês digitaram (títulos, itens, a lista sugerida da mala)
+  fica como está; só os nomes das três malas padrão acompanham o idioma.
+- Traduções em `src/i18n/en.json` e `zh.json`; a chave é o texto em português, passado em `t("…")`
+  (`src/lib/i18n.ts`). `node scripts/chaves-i18n.mjs` mostra os textos que faltam traduzir.
 
 ## Instalar no celular
 

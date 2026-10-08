@@ -9,6 +9,7 @@ import { AvisoEnviar } from "../comp/Roteiro";
 import type { Dia } from "../db/tipos";
 import { conflitos } from "../lib/tempo";
 import { dataLonga, diaSemana, somaDias, hojeDaViagem, listaDias } from "../lib/datas";
+import { t } from "../lib/i18n";
 
 /* the chosen day and view survive switching tabs (not reloads) */
 type Modo = "dia" | "semana" | "mes" | "viagem";
@@ -38,7 +39,7 @@ export function Calendario({ viagem }: { viagem: Viagem }) {
     <>
       <AvisoEnviar />
       <div class="seg" role="tablist">
-        {([["dia", "Dia"], ["semana", "Semana"], ["mes", "Mês"], ["viagem", "Viagem"]] as [Modo, string][]).map(([m, r]) => (
+        {([["dia", t("Dia")], ["semana", t("Semana")], ["mes", t("Mês")], ["viagem", t("Viagem")]] as [Modo, string][]).map(([m, r]) => (
           <button role="tab" aria-selected={modo === m} class={modo === m ? "on" : ""} onClick={() => setModo(m)}>{r}</button>))}
       </div>
       {modo === "dia" && <VistaDia data={data} setData={setData} datas={datas} hoje={hoje} cidade={cidade(data)} dia={dias.find((d) => d.data === data)}
@@ -46,7 +47,7 @@ export function Calendario({ viagem }: { viagem: Viagem }) {
       {modo === "semana" && <VistaSemana data={data} setData={setData} hoje={hoje} cidade={cidade} doDia={doDia} abrir={folha.abrir} novo={folha.novo} />}
       {modo === "mes" && <VistaMes datas={datas} inicio={viagem.inicio} fim={viagem.fim} hoje={hoje} cidade={cidade} doDia={doDia} irPara={irPara} />}
       {modo === "viagem" && <VistaViagem datas={datas} hoje={hoje} cidade={cidade} doDia={doDia} irPara={irPara} />}
-      <button class="fab" aria-label="Novo evento" onClick={() => folha.novo(modo === "dia" || modo === "semana" ? data : padrao)}>＋</button>
+      <button class="fab" aria-label={t("Novo evento")} onClick={() => folha.novo(modo === "dia" || modo === "semana" ? data : padrao)}>＋</button>
       {folha.elemento}
     </>
   );
@@ -82,22 +83,22 @@ function VistaDia({ data, setData, datas, hoje, cidade, dia, evs, abrir }: {
           </button>))}
       </div>
       <div class="nav-dia">
-        <button class="btn-icone" aria-label="Dia anterior" onClick={() => setData(somaDias(data, -1))}>‹</button>
+        <button class="btn-icone" aria-label={t("Dia anterior")} onClick={() => setData(somaDias(data, -1))}>‹</button>
         <div class="nav-dia-meio">
           <b>{dataLonga(data)}</b>
-          <span class="muted pequeno">{d0(cidade)}{data === hoje ? " · hoje" : ""}</span>
+          <span class="muted pequeno">{d0(cidade)}{data === hoje ? " · " + t("hoje") : ""}</span>
         </div>
-        <button class="btn-icone" aria-label="Dia seguinte" onClick={() => setData(somaDias(data, 1))}>›</button>
+        <button class="btn-icone" aria-label={t("Dia seguinte")} onClick={() => setData(somaDias(data, 1))}>›</button>
       </div>
       <LookDoDia dia={dia} compacto />
-      {choque.size > 0 && <div class="faixa-aviso">⚠️ Há eventos com horários sobrepostos neste dia.</div>}
+      {choque.size > 0 && <div class="faixa-aviso">⚠️ {t("Há eventos com horários sobrepostos neste dia.")}</div>}
       {evs.length
         ? <div class="lista-ev">{evs.map((e) => <CartaoEvento e={e} conflito={choque.has(e.id)} aoAbrir={abrir} />)}</div>
-        : <div class="vazio"><div class="emo">🗓️</div>Nenhum evento neste dia.<br /><span class="pequeno">Toque em ＋ para criar.</span></div>}
+        : <div class="vazio"><div class="emo">🗓️</div>{t("Nenhum evento neste dia.")}<br /><span class="pequeno">{t("Toque em ＋ para criar.")}</span></div>}
     </div>
   );
 }
-const d0 = (c: string) => (c ? `📍 ${c}` : "cidade não definida");
+const d0 = (c: string) => (c ? `📍 ${c}` : t("cidade não definida"));
 
 function VistaViagem({ datas, hoje, cidade, doDia, irPara }: {
   datas: string[]; hoje: string; cidade: (d: string) => string;
@@ -112,12 +113,12 @@ function VistaViagem({ datas, hoje, cidade, doDia, irPara }: {
             <div class="rd-data"><span>{diaSemana(d)}</span><b>{+d.slice(8)}</b><span>{d.slice(5, 7)}/{d.slice(2, 4)}</span></div>
             <div class="rd-corpo">
               <div class="rd-cidade">{cidade(d) || <span class="muted">—</span>}
-                {d === hoje && <span class="selo selo-agora">Hoje</span>}
-                {choque.size > 0 && <span class="tag tag-aviso">⚠️ conflito</span>}</div>
-              {evs.length === 0 && <div class="muted pequeno">sem eventos</div>}
+                {d === hoje && <span class="selo selo-agora">{t("Hoje")}</span>}
+                {choque.size > 0 && <span class="tag tag-aviso">⚠️ {t("conflito")}</span>}</div>
+              {evs.length === 0 && <div class="muted pequeno">{t("sem eventos")}</div>}
               {evs.slice(0, 4).map((e) => (
-                <div class="rd-ev"><span class={`rd-h ${e.horaInicio ? "" : "rd-todo"}`}>{e.horaInicio || "dia todo"}</span> {TIPOS[e.tipo]?.emo} {e.titulo} <span class="camada-ic" title={e.camada === "coletivo" ? "Grupo" : "Pessoal"}>{e.camada === "coletivo" ? "👥" : "👤"}</span></div>))}
-              {evs.length > 4 && <div class="muted pequeno">+ {evs.length - 4} eventos</div>}
+                <div class="rd-ev"><span class={`rd-h ${e.horaInicio ? "" : "rd-todo"}`}>{e.horaInicio || t("dia todo")}</span> {TIPOS[e.tipo]?.emo} {e.titulo} <span class="camada-ic" title={e.camada === "coletivo" ? t("Grupo") : t("Pessoal")}>{e.camada === "coletivo" ? "👥" : "👤"}</span></div>))}
+              {evs.length > 4 && <div class="muted pequeno">{t("+ {n} eventos", { n: evs.length - 4 })}</div>}
             </div>
           </button>);
       })}

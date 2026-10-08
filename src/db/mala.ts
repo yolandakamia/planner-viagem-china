@@ -4,35 +4,38 @@ import type { Item, Mala, StatusItem, OrigemItem } from "./tipos";
 import { avisarMudanca, useVersaoDados } from "./mudancas";
 import { uuid, agoraISO } from "../lib/uuid";
 import { ITENS_SUGERIDOS } from "./sugestoes";
+import { t, LOCALE } from "../lib/i18n";
 
 export const NAO_VOLTA = "nao-volta";
 
 export const CATEGORIAS: Record<string, { rot: string; emo: string }> = {
-  roupa:      { rot: "Roupa",      emo: "👕" },
-  calcado:    { rot: "Calçado",    emo: "👞" },
-  eletronico: { rot: "Eletrônico", emo: "🔌" },
-  documento:  { rot: "Documento",  emo: "🛂" },
-  higiene:    { rot: "Higiene",    emo: "🧴" },
-  trabalho:   { rot: "Trabalho",   emo: "💼" },
-  outros:     { rot: "Outros",     emo: "📦" },
+  roupa:      { rot: t("Roupa"),      emo: "👕" },
+  calcado:    { rot: t("Calçado"),    emo: "👞" },
+  eletronico: { rot: t("Eletrônico"), emo: "🔌" },
+  documento:  { rot: t("Documento"),  emo: "🛂" },
+  higiene:    { rot: t("Higiene"),    emo: "🧴" },
+  trabalho:   { rot: t("Trabalho"),   emo: "💼" },
+  outros:     { rot: t("Outros"),     emo: "📦" },
 };
 /* suggestions only — the field is free text */
 export const SUBCATEGORIAS = ["camisa", "camiseta", "calça", "saia / vestido", "blazer", "agasalho",
   "roupa íntima", "meias", "pijama", "acessório", "sapato", "tênis"];
 export const ESTILOS = ["social", "casual", "esporte"];
 export const STATUS: StatusItem[] = ["a separar", "separado", "na mala"];
+/* display labels of the stored status values */
+export const ROT_STATUS: Record<StatusItem, string> = { "a separar": t("a separar"), "separado": t("separado"), "na mala": t("na mala") };
 export const ORIGENS_VOLTA: Record<Exclude<OrigemItem, "levar">, { rot: string; emo: string }> = {
-  compra:   { rot: "Compra",   emo: "🛍️" },
-  amostra:  { rot: "Amostra",  emo: "🧪" },
-  catalogo: { rot: "Catálogo", emo: "📚" },
+  compra:   { rot: t("Compra"),   emo: "🛍️" },
+  amostra:  { rot: t("Amostra"),  emo: "🧪" },
+  catalogo: { rot: t("Catálogo"), emo: "📚" },
 };
 
 export function novoItem(origem: OrigemItem = "levar", malaId: string | null = null): Item {
-  const t = agoraISO();
+  const agora = agoraISO();
   return { id: uuid(), nome: "", categoria: origem === "levar" ? "roupa" : "outros", subcategoria: "",
     quantidade: 1, pesoG: null, malaId: origem === "levar" ? malaId : null,
     malaVoltaId: origem === "levar" ? null : malaId, estilo: "", cor: "",
-    status: "a separar", fotoId: null, origem, obs: "", soMao: false, criadoEm: t, atualizadoEm: t };
+    status: "a separar", fotoId: null, origem, obs: "", soMao: false, criadoEm: agora, atualizadoEm: agora };
 }
 
 export async function salvarItem(i: Item) {
@@ -66,7 +69,7 @@ export async function excluirMala(id: string) {
 export async function adicionarSugestoesQueFaltam(malas: Mala[]): Promise<number> {
   const db = await abrirBanco();
   const nomes = new Set((await db.getAll("itens")).map((i) => i.nome.trim().toLowerCase()));
-  const porTipo = (t: string) => malas.find((m) => (m.tipo ?? "") === t)?.id ?? malas[0]?.id ?? null;
+  const porTipo = (tp: string) => malas.find((m) => (m.tipo ?? "") === tp)?.id ?? malas[0]?.id ?? null;
   let n = 0;
   for (const [nome, categoria, subcategoria, quantidade, pesoG, mala, obs, soMao, estilo] of ITENS_SUGERIDOS) {
     if (nomes.has(nome.toLowerCase())) continue;
@@ -96,7 +99,7 @@ export function useMala() {
 
 /* ---------- weights (grams; the total is unit weight × quantity) ---------- */
 export const pesoTotal = (i: Item) => (i.pesoG ?? 0) * (i.quantidade || 1);
-export const kg = (g: number) => (g / 1000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+export const kg = (g: number) => (g / 1000).toLocaleString(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 /* bag of each item on the way back */
 export function malaNaVolta(i: Item): string | null {
@@ -114,3 +117,8 @@ export function pesosPorMala(malas: Mala[], itens: Item[], trecho: "ida" | "volt
     return { mala: m, g, semPeso, n: dentro.length, limiteG, passou: limiteG != null && g > limiteG };
   });
 }
+
+/* the default bags are written in Portuguese (migration v2): only their
+   display follows the interface language; a renamed bag shows as typed */
+const MALAS_ROT: Record<string, string> = { "Mala despachada": t("Mala despachada"), "Mala de mão": t("Mala de mão"), "Mochila": t("Mochila") };
+export const nomeMala = (m: { nome: string }) => MALAS_ROT[m.nome] ?? m.nome;

@@ -7,6 +7,7 @@ import { previa, receber, roteiroParaEnviar, limparPendente, type Plano, type Ro
 import { lerRoteiro, quandoRoteiro, temRoteiro, ehIOS, instalado, diagnostico, montarMensagem } from "../lib/roteiro";
 import { dataCurta } from "../lib/datas";
 import { Folha } from "./Folha";
+import { t, tn } from "../lib/i18n";
 
 export function useRoteiroAtual() {
   const versao = useVersaoDados();
@@ -22,7 +23,6 @@ export function usePendente() {
   return p;
 }
 
-const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
 const linhaEv = (e: Evento) => `${e.titulo} · ${dataCurta(e.data)}${e.horaInicio ? " " + e.horaInicio : ""}`;
 
 /* what will change, event by event */
@@ -34,7 +34,7 @@ function ListaMudancas({ p }: { p: Plano }) {
   return (
     <ul class="mudancas">
       {l.slice(0, 12).map(([s, rot, e]) => <li class={`mud-${rot}`}><b>{s}</b> {linhaEv(e)}</li>)}
-      {l.length > 12 && <li class="muted">… e mais {l.length - 12}</li>}
+      {l.length > 12 && <li class="muted">{t("… e mais {n}", { n: l.length - 12 })}</li>}
     </ul>);
 }
 
@@ -53,44 +53,44 @@ export function ReceberRoteiro({ texto = "", recebido, aoFechar }: { texto?: str
 
   async function atualizar() { if (r) setFeito(await receber(r)); }
   async function copiar() {
-    try { await navigator.clipboard.writeText(texto); setCopiado(true); } catch { prompt("Copie o link abaixo:", texto); }
+    try { await navigator.clipboard.writeText(texto); setCopiado(true); } catch { prompt(t("Copie o link abaixo:"), texto); }
   }
 
   // iPhone opened the link in Safari, not in the app on the Home Screen
   const safariDoIphone = ehIOS() && !instalado();
   const nada = !!p && p.gravar.length + p.apagar.length + p.cidades.length === 0;
-  const de = r && (r.de === "planejador" ? "do planejador" : `enviado por ${r.de}`);
+  const de = r && (r.de === "planejador" ? t("do planejador") : t("enviado por {nome}", { nome: r.de }));
 
   if (feito) return (
-    <Folha titulo="Roteiro atualizado" aoFechar={aoFechar} rodape={<button class="btn primario" onClick={aoFechar}>OK</button>}>
-      <p style="color:var(--ok);font-weight:600">✓ Roteiro do grupo atualizado.</p>
-      <p class="pequeno">{plural(feito.novos, "evento novo", "eventos novos")}, {plural(feito.atualizados, "atualizado", "atualizados")}
-        {feito.removidos > 0 && `, ${plural(feito.removidos, "excluído", "excluídos")}`}.</p>
-      <p class="muted pequeno">Seus eventos pessoais (👤) não foram alterados.</p>
+    <Folha titulo={t("Roteiro atualizado")} aoFechar={aoFechar} rodape={<button class="btn primario" onClick={aoFechar}>OK</button>}>
+      <p style="color:var(--ok);font-weight:600">{t("✓ Roteiro do grupo atualizado.")}</p>
+      <p class="pequeno">{tn(feito.novos, "{n} evento novo", "{n} eventos novos")}, {tn(feito.atualizados, "{n} atualizado", "{n} atualizados")}
+        {feito.removidos > 0 && `, ${tn(feito.removidos, "{n} excluído", "{n} excluídos")}`}.</p>
+      <p class="muted pequeno">{t("Seus eventos pessoais (👤) não foram alterados.")}</p>
     </Folha>);
 
   return (
-    <Folha titulo="Roteiro do grupo" aoFechar={aoFechar} rodape={r && <>
-      <button class="btn" onClick={aoFechar}>{nada ? "Fechar" : "Cancelar"}</button>
-      {!nada && <button class="btn primario" disabled={!p} onClick={atualizar}>Atualizar roteiro</button>}
+    <Folha titulo={t("Roteiro do grupo")} aoFechar={aoFechar} rodape={r && <>
+      <button class="btn" onClick={aoFechar}>{nada ? t("Fechar") : t("Cancelar")}</button>
+      {!nada && <button class="btn primario" disabled={!p} onClick={atualizar}>{t("Atualizar roteiro")}</button>}
     </>}>
       {erro && <><p style="color:var(--aviso)">{erro}</p>
-        <p class="muted pequeno" style="word-break:break-all">Detalhes (para o print): {diagnostico(texto)}</p>
-        <p class="pequeno">Tente também: copie a mensagem inteira e toque em <b>📋 Colar roteiro</b>.</p></>}
-      {!erro && !r && <p class="muted"><span class="giro giro-peq" /> Abrindo o roteiro…</p>}
+        <p class="muted pequeno" style="word-break:break-all">{t("Detalhes (para o print):")} {diagnostico(texto)}</p>
+        <p class="pequeno">{t("Tente também: copie a mensagem inteira e toque em 📋 Colar roteiro.")}</p></>}
+      {!erro && !r && <p class="muted"><span class="giro giro-peq" /> {t("Abrindo o roteiro…")}</p>}
       {r && (<>
-        <p>Roteiro de <b>{quandoRoteiro(r.em)}</b> <span class="muted">· {de}</span></p>
-        {nada && <div class="faixa-aviso faixa-ok">✓ Nada novo: você já tem tudo o que está neste roteiro.</div>}
-        {p && !nada && <p class="pequeno">Vai criar <b>{p.novos}</b>, atualizar <b>{p.atualizados}</b>
-          {p.removidos > 0 && <> e excluir <b>{p.removidos}</b></>}{p.cidades.length > 0 && <> · {plural(p.cidades.length, "cidade", "cidades")}</>}.</p>}
+        <p>{t("Roteiro de")} <b>{quandoRoteiro(r.em)}</b> <span class="muted">· {de}</span></p>
+        {nada && <div class="faixa-aviso faixa-ok">{t("✓ Nada novo: você já tem tudo o que está neste roteiro.")}</div>}
+        {p && !nada && <p class="pequeno">{p.removidos > 0
+          ? t("Vai criar {a}, atualizar {b} e excluir {c}", { a: p.novos, b: p.atualizados, c: p.removidos })
+          : t("Vai criar {a}, atualizar {b}", { a: p.novos, b: p.atualizados })}{p.cidades.length > 0 && <> · {tn(p.cidades.length, "{n} cidade", "{n} cidades")}</>}.</p>}
         {p && <ListaMudancas p={p} />}
-        {p && p.maisAntigos > 0 && <p class="muted pequeno">{plural(p.maisAntigos, "evento ficou", "eventos ficaram")} de fora: você tem uma versão mais nova.</p>}
-        <p class="muted pequeno">Só os eventos do grupo (👥) mudam. Seus eventos pessoais (👤) não são alterados.</p>
+        {p && p.maisAntigos > 0 && <p class="muted pequeno">{tn(p.maisAntigos, "{n} evento ficou de fora: você tem uma versão mais nova.", "{n} eventos ficaram de fora: você tem uma versão mais nova.")}</p>}
+        <p class="muted pequeno">{t("Só os eventos do grupo (👥) mudam. Seus eventos pessoais (👤) não são alterados.")}</p>
         {safariDoIphone && (
           <div class="faixa-aviso">
-            📱 <b>Usa o app pela Tela de Início?</b> O iPhone abriu este link no Safari, que guarda os dados separado do app.
-            Toque em <b>Copiar roteiro</b>, abra o app e toque em <b>📋 Colar roteiro</b> (na página Hoje).
-            <button class="btn btn-peq" style="display:block;margin-top:8px" onClick={copiar}>{copiado ? "✓ Copiado" : "Copiar roteiro"}</button>
+            📱 <b>{t("Usa o app pela Tela de Início?")}</b> {t("O iPhone abriu este link no Safari, que guarda os dados separado do app. Toque em Copiar roteiro, abra o app e toque em 📋 Colar roteiro (na página Hoje).")}
+            <button class="btn btn-peq" style="display:block;margin-top:8px" onClick={copiar}>{copiado ? t("✓ Copiado") : t("Copiar roteiro")}</button>
           </div>)}
       </>)}
     </Folha>
@@ -106,21 +106,21 @@ export function useColarRoteiro() {
 
   async function colar() {
     try {
-      const t = await navigator.clipboard.readText();
-      if (temRoteiro(t)) { setTexto(t); return; }
+      const c = await navigator.clipboard.readText();
+      if (temRoteiro(c)) { setTexto(c); return; }
     } catch { /* not allowed: fall back to the box */ }
     setRascunho(""); setManual(true);
   }
   const elemento = <>
     {manual && (
-      <Folha titulo="Colar roteiro" aoFechar={() => setManual(false)} rodape={<>
-        <button class="btn" onClick={() => setManual(false)}>Cancelar</button>
-        <button class="btn primario" disabled={!temRoteiro(rascunho)} onClick={() => { setManual(false); setTexto(rascunho); }}>Abrir</button>
+      <Folha titulo={t("Colar roteiro")} aoFechar={() => setManual(false)} rodape={<>
+        <button class="btn" onClick={() => setManual(false)}>{t("Cancelar")}</button>
+        <button class="btn primario" disabled={!temRoteiro(rascunho)} onClick={() => { setManual(false); setTexto(rascunho); }}>{t("Abrir")}</button>
       </>}>
-        <p class="pequeno">No WhatsApp ou no WeChat, toque e segure a mensagem do roteiro, escolha <b>Copiar</b> e cole aqui.</p>
-        <textarea class="caixa-colar" rows={5} placeholder="Cole a mensagem aqui" value={rascunho}
+        <p class="pequeno">{t("No WhatsApp ou no WeChat, toque e segure a mensagem do roteiro, escolha Copiar e cole aqui.")}</p>
+        <textarea class="caixa-colar" rows={5} placeholder={t("Cole a mensagem aqui")} value={rascunho}
           onInput={(e) => setRascunho((e.target as HTMLTextAreaElement).value)} />
-        {rascunho && !temRoteiro(rascunho) && <p class="pequeno" style="color:var(--aviso)">Não achei o link do roteiro nesse texto.</p>}
+        {rascunho && !temRoteiro(rascunho) && <p class="pequeno" style="color:var(--aviso)">{t("Não achei o link do roteiro nesse texto.")}</p>}
       </Folha>)}
     {texto && <ReceberRoteiro key={texto} texto={texto} aoFechar={() => setTexto(null)} />}
   </>;
@@ -139,29 +139,29 @@ export function useCompartilharRoteiro() {
     const r = await roteiroParaEnviar();
     setMsg(montarMensagem(r)); setN(r.eventos.length); setStatus(""); setAberto(true);
   }
-  const enviado = async (t: string) => { await limparPendente(); setStatus(t); };
+  const enviado = async (m: string) => { await limparPendente(); setStatus(m); };
   async function compartilhar() {
-    try { await navigator.share({ text: msg }); await enviado("✓ Enviado. Quem receber toca no link para atualizar."); }
-    catch (e) { if ((e as Error).name !== "AbortError") setStatus("Não consegui abrir o compartilhamento. Use Copiar."); }
+    try { await navigator.share({ text: msg }); await enviado(t("✓ Enviado. Quem receber toca no link para atualizar.")); }
+    catch (e) { if ((e as Error).name !== "AbortError") setStatus(t("Não consegui abrir o compartilhamento. Use Copiar.")); }
   }
   async function copiar() {
-    try { await navigator.clipboard.writeText(msg); await enviado("✓ Mensagem copiada. Cole no WeChat ou onde quiser enviar."); }
-    catch { setStatus("Não consegui copiar."); }
+    try { await navigator.clipboard.writeText(msg); await enviado(t("✓ Mensagem copiada. Cole no WeChat ou onde quiser enviar.")); }
+    catch { setStatus(t("Não consegui copiar.")); }
   }
   const podeCompartilhar = typeof navigator.share === "function";
 
   const elemento = aberto && (
-    <Folha titulo="Compartilhar roteiro do grupo" aoFechar={() => setAberto(false)} rodape={<button class="btn" onClick={() => setAberto(false)}>Fechar</button>}>
-      <p class="pequeno">Vão <b>{plural(n, "evento do grupo", "eventos do grupo")}</b> (👥) e as exclusões. <b>Seus eventos pessoais (👤) não vão.</b></p>
+    <Folha titulo={t("Compartilhar roteiro do grupo")} aoFechar={() => setAberto(false)} rodape={<button class="btn" onClick={() => setAberto(false)}>{t("Fechar")}</button>}>
+      <p class="pequeno">{tn(n, "Vai {n} evento do grupo (👥) e as exclusões.", "Vão {n} eventos do grupo (👥) e as exclusões.")} <b>{t("Seus eventos pessoais (👤) não vão.")}</b></p>
       <div class="botoes-envio">
-        {podeCompartilhar && <button class="btn primario" onClick={compartilhar}>📤 Compartilhar… <span class="pequeno">(WhatsApp, WeChat…)</span></button>}
+        {podeCompartilhar && <button class="btn primario" onClick={compartilhar}>{t("📤 Compartilhar…")} <span class="pequeno">(WhatsApp, WeChat…)</span></button>}
         <a class={`btn ${podeCompartilhar ? "" : "primario"}`} href={`https://wa.me/?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener"
-          onClick={() => enviado("✓ WhatsApp aberto: escolha o grupo e envie.")}>🟢 WhatsApp</a>
-        <button class="btn" onClick={copiar}>📋 Copiar mensagem <span class="pequeno">(WeChat)</span></button>
+          onClick={() => enviado(t("✓ WhatsApp aberto: escolha o grupo e envie."))}>🟢 WhatsApp</a>
+        <button class="btn" onClick={copiar}>{t("📋 Copiar mensagem")} <span class="pequeno">(WeChat)</span></button>
       </div>
       {status && <p class="pequeno" style="color:var(--ok);font-weight:600">{status}</p>}
-      <p class="muted pequeno">Quem receber toca no link (ou cola a mensagem no app) e o roteiro do grupo se junta ao que a pessoa já tem, evento por evento.
-        O planejador do computador também recebe: <b>📤 Share itinerary → colar a mensagem</b>.</p>
+      <p class="muted pequeno">{t("Quem receber toca no link (ou cola a mensagem no app) e o roteiro do grupo se junta ao que a pessoa já tem, evento por evento.")}
+        {" "}{t("O planejador do computador também recebe:")} <b>{t("📤 Share itinerary → colar a mensagem")}</b>.</p>
     </Folha>);
   return { abrir, elemento };
 }
@@ -173,8 +173,8 @@ export function AvisoEnviar() {
   return (<>
     {p && p.n > 0 && (
       <div class="aviso-enviar" role="alert">
-        <span>📤 Você mudou o <b>roteiro do grupo</b>{p.n > 1 ? ` (${p.n} mudanças)` : ""}. Mande a versão atualizada para todos.</span>
-        <button class="btn btn-peq primario" onClick={abrir}>Enviar</button>
+        <span>{p.n > 1 ? t("📤 Você mudou o roteiro do grupo ({n} mudanças). Mande a versão atualizada para todos.", { n: p.n }) : t("📤 Você mudou o roteiro do grupo. Mande a versão atualizada para todos.")}</span>
+        <button class="btn btn-peq primario" onClick={abrir}>{t("Enviar")}</button>
       </div>)}
     {elemento}
   </>);
@@ -188,10 +188,10 @@ export function LinhaRoteiro() {
   if (atual === undefined) return null;
   return (
     <div class="linha-roteiro">
-      <span>📌 {atual ? <>Roteiro de <b>{quandoRoteiro(atual.em)}</b></> : "Roteiro ainda não recebido"}</span>
+      <span>📌 {atual ? <>{t("Roteiro de")} <b>{quandoRoteiro(atual.em)}</b></> : t("Roteiro ainda não recebido")}</span>
       <div class="lr-botoes">
-        <button class="btn btn-peq" onClick={colar}>📋 Colar</button>
-        <button class="btn btn-peq" onClick={env.abrir}>📤 Enviar</button>
+        <button class="btn btn-peq" onClick={colar}>{t("📋 Colar")}</button>
+        <button class="btn btn-peq" onClick={env.abrir}>{t("📤 Enviar")}</button>
       </div>
       {elemento}{env.elemento}
     </div>

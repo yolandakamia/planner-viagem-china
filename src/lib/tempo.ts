@@ -3,6 +3,7 @@
    as typed. Each event's wall-clock time is read in its own zone. */
 import type { Evento } from "../db/tipos";
 import { somaDias, FUSO_BRASIL, FUSO_CHINA, hojeEm, horaEm, dataCurta } from "./datas";
+import { t } from "./i18n";
 
 /* offset (ms) of a zone at a given instant, from Intl — no tz database shipped */
 function offsetMs(fuso: string, t: number): number {
@@ -56,10 +57,10 @@ export function conflitos(eventos: Evento[]): Set<string> {
 /* "1 h 20 min", "45 min", "2 dias" */
 export function duracao(ms: number): string {
   const min = Math.max(0, Math.round(ms / 60000));
-  if (min < 60) return `${min} min`;
+  if (min < 60) return t("{m} min", { m: min });
   const h = Math.floor(min / 60), m = min % 60;
-  if (h < 48) return m ? `${h} h ${m} min` : `${h} h`;
-  return `${Math.round(h / 24)} dias`;
+  if (h < 48) return m ? t("{h} h {m} min", { h, m }) : t("{h} h", { h });
+  return t("{n} dias", { n: Math.round(h / 24) });
 }
 
 /* the same moment on the other country's clock, for the description:
@@ -68,7 +69,7 @@ export function outroRelogio(e: Evento): { rot: string; texto: string } | null {
   const i = intervalo(e);
   if (!i) return null;
   const alvo = (e.fuso || FUSO_CHINA) === FUSO_BRASIL ? FUSO_CHINA : FUSO_BRASIL;
-  const rot = alvo === FUSO_BRASIL ? "No Brasil" : "Na China";
+  const rot = alvo === FUSO_BRASIL ? t("No Brasil") : t("Na China");
   const dIni = hojeEm(alvo, new Date(i.ini));
   let texto = `${dataCurta(dIni)}, ${horaEm(alvo, new Date(i.ini))}`;
   if (i.temFim) {
@@ -79,14 +80,14 @@ export function outroRelogio(e: Evento): { rot: string; texto: string } | null {
 }
 
 export const FUSOS: { id: string; rot: string; curto: string }[] = [
-  { id: "Asia/Shanghai", rot: "China (Shanghai, Shenzhen, Pequim)", curto: "China" },
-  { id: "America/Sao_Paulo", rot: "Brasil (Brasília)", curto: "hora de Brasília" },
-  { id: "Asia/Hong_Kong", rot: "Hong Kong", curto: "hora de Hong Kong" },
-  { id: "Africa/Addis_Ababa", rot: "Etiópia (Adis Abeba)", curto: "hora de Adis Abeba" },
-  { id: "Asia/Qatar", rot: "Catar (Doha)", curto: "hora de Doha" },
-  { id: "Asia/Dubai", rot: "Emirados (Dubai)", curto: "hora de Dubai" },
-  { id: "Europe/Lisbon", rot: "Portugal (Lisboa)", curto: "hora de Lisboa" },
-  { id: "Europe/Paris", rot: "Europa central (Paris, Frankfurt)", curto: "hora da Europa central" },
+  { id: "Asia/Shanghai", rot: t("China (Shanghai, Shenzhen, Pequim)"), curto: t("China") },
+  { id: "America/Sao_Paulo", rot: t("Brasil (Brasília)"), curto: t("hora de Brasília") },
+  { id: "Asia/Hong_Kong", rot: t("Hong Kong"), curto: t("hora de Hong Kong") },
+  { id: "Africa/Addis_Ababa", rot: t("Etiópia (Adis Abeba)"), curto: t("hora de Adis Abeba") },
+  { id: "Asia/Qatar", rot: t("Catar (Doha)"), curto: t("hora de Doha") },
+  { id: "Asia/Dubai", rot: t("Emirados (Dubai)"), curto: t("hora de Dubai") },
+  { id: "Europe/Lisbon", rot: t("Portugal (Lisboa)"), curto: t("hora de Lisboa") },
+  { id: "Europe/Paris", rot: t("Europa central (Paris, Frankfurt)"), curto: t("hora da Europa central") },
   { id: "UTC", rot: "UTC", curto: "UTC" },
 ];
 export const rotuloFuso = (id: string) => FUSOS.find((f) => f.id === id)?.curto ?? id;

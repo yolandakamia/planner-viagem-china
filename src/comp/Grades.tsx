@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { Evento } from "../db/tipos";
 import { TIPOS } from "../db/eventos";
 import { conflitos } from "../lib/tempo";
-import { somaDias, diaSemana, dataCurta, listaDias, diferencaDias } from "../lib/datas";
+import { somaDias, diaSemana, dataCurta, listaDias, diferencaDias, MESES_LONGOS, SEMANA_CURTA } from "../lib/datas";
+import { t, tn, idioma } from "../lib/i18n";
 
 /* Calendar grids: the week with hours (like Google Calendar) and the month.
    Times are drawn exactly as typed, the same as everywhere else in the app. */
 
 type DoDia = (d: string) => Evento[];
-const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 const min = (h: string) => { const [a, b] = h.split(":").map(Number); return a * 60 + b; };
 const PX_HORA = 52;
 
@@ -76,10 +76,10 @@ export function VistaSemana({ data, setData, hoje, cidade, doDia, abrir, novo }:
   return (
     <div {...toque}>
       <div class="nav-dia">
-        <button class="btn-icone" aria-label="Dias anteriores" onClick={() => setData(somaDias(data, -n))}>‹</button>
+        <button class="btn-icone" aria-label={t("Dias anteriores")} onClick={() => setData(somaDias(data, -n))}>‹</button>
         <div class="nav-dia-meio"><b>{dataCurta(dias[0])} – {dataCurta(dias[n - 1])}</b>
-          {!dias.includes(hoje) && <button class="link-hoje" onClick={() => setData(hoje)}>ir para hoje</button>}</div>
-        <button class="btn-icone" aria-label="Próximos dias" onClick={() => setData(somaDias(data, n))}>›</button>
+          {!dias.includes(hoje) && <button class="link-hoje" onClick={() => setData(hoje)}>{t("ir para hoje")}</button>}</div>
+        <button class="btn-icone" aria-label={t("Próximos dias")} onClick={() => setData(somaDias(data, n))}>›</button>
       </div>
       <div class="sem" style={`--n:${n}`}>
         <div class="sem-topo">
@@ -91,7 +91,7 @@ export function VistaSemana({ data, setData, hoje, cidade, doDia, abrir, novo }:
         </div>
         {temTodoDia && (
           <div class="sem-todo">
-            <div class="sem-hora">dia todo</div>
+            <div class="sem-hora">{t("dia todo")}</div>
             {todoDia.map((l) => <div>{l.map((e) => (
               <button class={`sem-chip t-${e.tipo}`} onClick={() => abrir(e)}>{e.camada === "coletivo" ? "👥" : "👤"} {TIPOS[e.tipo]?.emo} {e.titulo}</button>))}</div>)}
           </div>)}
@@ -117,7 +117,7 @@ export function VistaSemana({ data, setData, hoje, cidade, doDia, abrir, novo }:
           })}
         </div>
       </div>
-      <p class="muted pequeno" style="margin:10px 4px 90px">Deslize para os lados para ver outros dias. Toque num horário vazio para criar um evento ali.</p>
+      <p class="muted pequeno" style="margin:10px 4px 90px">{t("Deslize para os lados para ver outros dias. Toque num horário vazio para criar um evento ali.")}</p>
     </div>
   );
 }
@@ -137,16 +137,16 @@ export function VistaMes({ datas, inicio, fim, hoje, cidade, doDia, irPara }: {
     const dias = listaDias(primeiro, ultimo);
     return (
       <div class="mes">
-        <h3 class="secao">{MESES[mm - 1]} {y}</h3>
+        <h3 class="secao">{idioma === "zh" ? `${y}年${mm}月` : `${MESES_LONGOS[mm - 1]} ${y}`}</h3>
         <div class="mes-grade">
-          {["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].map((s) => <div class="mes-sem">{s}</div>)}
+          {SEMANA_CURTA.map((s) => <div class="mes-sem">{s}</div>)}
           {Array.from({ length: vazio }, () => <div />)}
           {dias.map((d) => {
             const naViagem = d >= inicio && d <= fim, evs = doDia(d);
             const c = cidade(d);
             return (
               <button class={`mes-dia ${naViagem ? "viagem" : ""} ${d === hoje ? "hoje" : ""}`} onClick={() => irPara(d)}
-                aria-label={`${dataCurta(d)}${c ? ", " + c : ""}, ${evs.length} eventos`}>
+                aria-label={`${dataCurta(d)}${c ? ", " + c : ""}, ${tn(evs.length, "{n} evento", "{n} eventos")}`}>
                 <span class="mes-num">{+d.slice(8)}</span>
                 {naViagem && c && <span class="mes-cid">{c}</span>}
                 {evs.slice(0, 3).map((e) => (
@@ -157,6 +157,6 @@ export function VistaMes({ datas, inicio, fim, hoje, cidade, doDia, irPara }: {
         </div>
       </div>);
   })}
-  <p class="muted pequeno" style="margin:10px 4px 90px">Toque num dia para ver a programação. {diferencaDias(inicio, fim) + 1} dias de viagem destacados.</p>
+  <p class="muted pequeno" style="margin:10px 4px 90px">{t("Toque num dia para ver a programação. {n} dias de viagem destacados.", { n: diferencaDias(inicio, fim) + 1 })}</p>
   </>);
 }
