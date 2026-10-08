@@ -105,6 +105,8 @@ export interface Item {
   /* must travel in the cabin (power bank, documents): warns if it is put
      in a checked bag */
   soMao?: boolean;
+  /* added in bulk from photos ("Várias fotos"): shown as "✏️ completar" until saved in the editor */
+  completar?: boolean;
   criadoEm: string;
   atualizadoEm: string;
 }

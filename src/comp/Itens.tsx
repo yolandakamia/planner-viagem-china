@@ -42,6 +42,7 @@ export function LinhaItem({ i, malas, volta = false, aoAbrir }: { i: Item; malas
           <span>{(mala && nomeMala(mala)) ?? (volta ? t("sem mala de destino") : t("sem mala"))}</span>
           {i.pesoG != null && <span>{g >= 1000 ? `${kg(g)} kg` : `${g} g`}</span>}
           {i.subcategoria && <span>{i.subcategoria}</span>}
+          {i.completar && <span class="tag tag-completar">{t("✏️ completar")}</span>}
           {foraDaMao(i, malas) && <span class="tag tag-aviso">{t("⚠️ só na bagagem de mão")}</span>}
           {!volta && i.malaVoltaId === NAO_VOLTA && <span class="tag">{t("não volta")}</span>}
         </div>
@@ -68,7 +69,7 @@ export function EditorItem({ inicial, novo, malas, aoFechar }: { inicial: Item; 
     let fotoId = i.fotoId;
     if (foto.tipo === "nova") { fotoId = await gravarFoto(foto.img); await apagarFoto(i.fotoId); }
     if (foto.tipo === "remover") { await apagarFoto(i.fotoId); fotoId = null; }
-    await salvarItem({ ...i, fotoId, nome: i.nome.trim(), quantidade: Math.max(1, Math.round(i.quantidade || 1)) });
+    await salvarItem({ ...i, fotoId, nome: i.nome.trim(), quantidade: Math.max(1, Math.round(i.quantidade || 1)), completar: undefined });
     aoFechar();
   }
   async function excluir() {

@@ -3,8 +3,9 @@ import type { Item, StatusItem } from "../db/tipos";
 import { useMala, novoItem, pesosPorMala, kg, CATEGORIAS, STATUS, ROT_STATUS, NAO_VOLTA, nomeMala } from "../db/mala";
 import { t, tn } from "../lib/i18n";
 import { LinhaItem, EditorItem, GerenciarMalas, foraDaMao } from "../comp/Itens";
+import { VariasFotos } from "../comp/VariasFotos";
 
-type Filtros = { mala: string; categoria: string; status: string };
+type Filtros = { mala: string; categoria: string; status: string; completar?: boolean };
 /* view and filters survive switching tabs */
 let memoria: { trecho: "ida" | "volta"; f: Filtros } = { trecho: "ida", f: { mala: "", categoria: "", status: "" } };
 
@@ -14,6 +15,7 @@ export function MalaAba() {
   const [f, setF] = useState<Filtros>(memoria.f);
   const [aberto, setAberto] = useState<{ i: Item; novo: boolean } | null>(null);
   const [gerir, setGerir] = useState(false);
+  const [varias, setVarias] = useState(false);
   useEffect(() => { memoria = { trecho, f }; }, [trecho, f]);
   if (!pronto) return null;
 
@@ -27,11 +29,13 @@ export function MalaAba() {
   const filtrados = levar.filter((i) =>
     (!f.mala || (f.mala === "-" ? !i.malaId : i.malaId === f.mala)) &&
     (!f.categoria || i.categoria === f.categoria) &&
-    (!f.status || i.status === f.status));
+    (!f.status || i.status === f.status) &&
+    (!f.completar || !!i.completar));
+  const aCompletar = levar.filter((i) => i.completar).length;
   const grupos = Object.keys(CATEGORIAS).concat([...new Set(filtrados.map((i) => i.categoria))].filter((c) => !CATEGORIAS[c]))
     .map((c) => ({ c, itens: filtrados.filter((i) => i.categoria === c).sort((a, b) => a.nome.localeCompare(b.nome)) }))
     .filter((g) => g.itens.length);
-  const temFiltro = !!(f.mala || f.categoria || f.status);
+  const temFiltro = !!(f.mala || f.categoria || f.status || f.completar);
 
   return (
     <>
@@ -65,6 +69,12 @@ export function MalaAba() {
 
       {trecho === "ida" ? (<>
         {alertaMao.length > 0 && <div class="faixa-aviso">⚠️ {tn(alertaMao.length, "1 item que só pode ir na bagagem de mão está numa mala despachada: {nomes}.", "{n} itens que só podem ir na bagagem de mão estão numa mala despachada: {nomes}.", { nomes: alertaMao.map((i) => i.nome).join(", ") })}</div>}
+        <button class="btn varias-fotos" onClick={() => setVarias(true)}>{t("📷 Adicionar várias fotos de uma vez")}</button>
+        {aCompletar > 0 && (
+          <div class="faixa-aviso faixa-completar">
+            <span>✏️ {tn(aCompletar, "{n} peça para completar.", "{n} peças para completar.")} {t("Toque em cada uma para pôr as informações.")}</span>
+            <button class="btn btn-peq" onClick={() => setF({ ...f, completar: !f.completar })}>{f.completar ? t("Ver todas") : t("Ver só essas")}</button>
+          </div>)}
         <div class="filtros">
           <select aria-label={t("Filtrar por mala")} value={f.mala} onChange={(e) => setF({ ...f, mala: (e.target as HTMLSelectElement).value })}>
             <option value="">{t("Todas as malas")}</option>
@@ -80,7 +90,7 @@ export function MalaAba() {
             {STATUS.map((s) => <option value={s}>{ROT_STATUS[s]}</option>)}
           </select>
         </div>
-        {temFiltro && <button class="limpar" onClick={() => setF({ mala: "", categoria: "", status: "" })}>{t("✕ limpar filtros ({n} de {total})", { n: filtrados.length, total: levar.length })}</button>}
+        {temFiltro && <button class="limpar" onClick={() => setF({ mala: "", categoria: "", status: "", completar: false })}>{t("✕ limpar filtros ({n} de {total})", { n: filtrados.length, total: levar.length })}</button>}
         {grupos.map((g) => (
           <section>
             <h3 class="secao">{CATEGORIAS[g.c]?.emo} {CATEGORIAS[g.c]?.rot ?? g.c} <span class="muted">({g.itens.length})</span></h3>
@@ -102,6 +112,7 @@ export function MalaAba() {
       </>)}
 
       {aberto && <EditorItem inicial={aberto.i} novo={aberto.novo} malas={malas} aoFechar={() => setAberto(null)} />}
+      {varias && <VariasFotos malas={malas} aoFechar={() => setVarias(false)} />}
       {gerir && <GerenciarMalas malas={malas} aoFechar={() => setGerir(false)} />}
     </>
   );

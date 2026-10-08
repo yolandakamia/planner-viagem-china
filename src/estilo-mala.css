@@ -86,3 +86,10 @@
 .mini { flex: none; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 8px; }
 .mini img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .item-mini { width: 48px; height: 48px; border: 1px solid var(--linha); padding: 2px; }
+
+/* bulk photos */
+.varias-fotos { width: 100%; margin-bottom: 10px; }
+.faixa-completar { display: flex; align-items: center; gap: 10px; }
+.faixa-completar span { flex: 1; }
+.faixa-completar .btn { flex: none; }
+.tag-completar { background: color-mix(in srgb, var(--aviso) 18%, var(--superficie)); color: var(--texto); }
