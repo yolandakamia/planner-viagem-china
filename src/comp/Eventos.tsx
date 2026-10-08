@@ -137,8 +137,8 @@ export function useEventosFolha(cidadeDoDia: (data: string) => string) {
   const fechar = () => setAberto(null);
   return {
     abrir: (e: Evento) => setAberto({ modo: "ver", e }),
-    novo: (data: string) => setAberto({ modo: "editar",
-      novo: true, e: novoEvento(data, cidadeNoBrasil(cidadeDoDia(data)) ? FUSO_BRASIL : FUSO_CHINA) }),
+    novo: (data: string, hora = "") => setAberto({ modo: "editar",
+      novo: true, e: { ...novoEvento(data, cidadeNoBrasil(cidadeDoDia(data)) ? FUSO_BRASIL : FUSO_CHINA), horaInicio: hora } }),
     elemento: aberto?.modo === "ver"
       ? <Detalhe e={aberto.e} aoFechar={fechar} aoEditar={() => setAberto({ modo: "editar", e: aberto.e })}
           aoDuplicar={(c) => setAberto({ modo: "editar", e: c, novo: true })} />

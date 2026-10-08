@@ -1,11 +1,15 @@
 import { defineConfig } from "vite";
 import preact from "@preact/preset-vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { readFileSync } from "node:fs";
+
+const VERSAO = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")).version;
 
 // base "./": every path is relative, so the app works under
 // usuario.github.io/nome-do-repo/ whatever the repo is called.
 export default defineConfig({
   base: "./",
+  define: { __VERSAO__: JSON.stringify(VERSAO) },
   plugins: [
     preact(),
     VitePWA({

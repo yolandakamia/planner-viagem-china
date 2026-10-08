@@ -147,3 +147,49 @@
 .faixa-ok { background: color-mix(in srgb, var(--ok) 14%, var(--superficie)); }
 .caixa-colar { width: 100%; box-sizing: border-box; font: inherit; font-size: 14px; padding: 10px;
   border: 1px solid var(--linha); border-radius: 10px; background: var(--superficie); color: var(--texto); resize: vertical; }
+
+/* ---------- week with hours ---------- */
+.link-hoje { border: 0; background: none; color: var(--acento); font: inherit; font-size: 13px; font-weight: 600; padding: 2px; }
+.sem { --col: minmax(0, 1fr); background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; }
+.sem-topo, .sem-todo { display: grid; grid-template-columns: 40px repeat(var(--n), var(--col)); border-bottom: 1px solid var(--linha); }
+.sem-cab { border: 0; border-left: 1px solid var(--linha); background: none; color: var(--texto); padding: 6px 2px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px; font: inherit; min-width: 0; }
+.sem-cab span { font-size: 11px; color: var(--texto-2); text-transform: uppercase; }
+.sem-cab b { font-size: 18px; line-height: 1.1; }
+.sem-cab small { font-size: 10.5px; color: var(--texto-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sem-cab.hoje b { background: var(--acento); color: var(--acento-texto); border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; }
+.sem-todo > div { border-left: 1px solid var(--linha); padding: 3px 2px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sem-todo .sem-hora { position: static; border: 0; padding: 4px 2px; font-size: 9.5px; line-height: 1.1; }
+.sem-chip { border: 0; border-radius: 6px; padding: 3px 5px; font: inherit; font-size: 11px; text-align: left; color: var(--texto);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: color-mix(in srgb, var(--tcor) 20%, var(--superficie)); }
+.sem-corpo { position: relative; display: grid; grid-template-columns: 40px repeat(var(--n), var(--col)); }
+.sem-horas { position: relative; }
+.sem-hora { position: absolute; left: 0; width: 40px; text-align: right; padding-right: 5px; font-size: 10.5px; color: var(--texto-2);
+  transform: translateY(-6px); box-sizing: border-box; }
+.sem-hora:first-child { transform: none; }
+.sem-col { position: relative; border-left: 1px solid var(--linha); min-width: 0; }
+.sem-col.hoje { background: color-mix(in srgb, var(--acento) 5%, transparent); }
+.sem-linha { position: absolute; left: 0; right: 0; border-top: 1px solid color-mix(in srgb, var(--linha) 70%, transparent); pointer-events: none; }
+.sem-ev { position: absolute; z-index: 1; border: 0; border-left: 3px solid var(--tcor); border-radius: 6px; padding: 2px 4px;
+  background: color-mix(in srgb, var(--tcor) 22%, var(--superficie)); color: var(--texto); font: inherit; font-size: 11px; line-height: 1.25;
+  text-align: left; overflow: hidden; overflow-wrap: break-word; hyphens: auto; box-sizing: border-box; }
+.sem-ev b { font-size: 10.5px; display: block; }
+.sem-ev.choque { outline: 2px solid var(--aviso); }
+.t-feira { --tcor: var(--t-feira); } .t-reuniao { --tcor: var(--t-reuniao); } .t-deslocamento { --tcor: var(--t-deslocamento); }
+.t-refeicao { --tcor: var(--t-refeicao); } .t-livre { --tcor: var(--t-livre); } .t-outro { --tcor: var(--t-outro); }
+
+/* ---------- month ---------- */
+.mes { margin-bottom: 14px; }
+.mes-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.mes-sem { text-align: center; font-size: 11px; color: var(--texto-2); text-transform: uppercase; padding: 2px 0 4px; }
+.mes-dia { min-height: 92px; border: 1px solid transparent; border-radius: 8px; background: none; color: var(--texto-2); font: inherit;
+  padding: 3px 2px; display: flex; flex-direction: column; align-items: stretch; gap: 2px; text-align: left; min-width: 0; overflow: hidden; }
+.mes-dia.viagem { background: var(--superficie); border-color: var(--linha); color: var(--texto); }
+.mes-dia.hoje { border-color: var(--acento); box-shadow: inset 0 0 0 1px var(--acento); }
+.mes-num { font-weight: 700; font-size: 13px; padding-left: 2px; }
+.mes-dia.hoje .mes-num { color: var(--acento); }
+.mes-cid { font-size: 9.5px; color: var(--texto-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 2px; }
+.mes-ev { font-size: 9.5px; line-height: 1.2; border-radius: 4px; padding: 1px 3px; overflow: hidden; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2;
+  background: color-mix(in srgb, var(--tcor) 22%, var(--superficie)); border-left: 2px solid var(--tcor); }
+.mes-mais { font-size: 9.5px; color: var(--texto-2); padding-left: 2px; }

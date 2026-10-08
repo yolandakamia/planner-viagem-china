@@ -9,6 +9,7 @@
 
    Payload: { app: "viagem-china-roteiro", v: 1, em: ISO time it was shared,
               plano: plan name, eventos: [planner events], dias: {date: {cidade}} } */
+import { inflateSync, strFromU8 } from "fflate";
 import type { BackupPlanner, VersaoRoteiro } from "./importarPlanner";
 
 const APP = "viagem-china-roteiro";
@@ -50,14 +51,21 @@ function decodificar(codigo: string): Uint8Array<ArrayBuffer> {
   return bytes.subarray(0, esperado);
 }
 
-async function inflar(bytes: Uint8Array<ArrayBuffer>): Promise<string> {
-  if (typeof DecompressionStream === "undefined")
-    throw new Error("Este navegador é antigo demais para abrir o roteiro. Atualize o navegador (ou abra o link no Chrome) e tente de novo.");
-  let ds: DecompressionStream;
-  try { ds = new DecompressionStream("deflate-raw"); }
-  catch { throw new Error("Este navegador é antigo demais para abrir o roteiro. Atualize o navegador (ou abra o link no Chrome) e tente de novo."); }
-  const fluxo = new Blob([bytes]).stream().pipeThrough(ds);
-  return new Response(fluxo).text();
+/* fflate (bundled), not the browser's DecompressionStream: works the same
+   on any browser, Samsung Internet included */
+function inflar(bytes: Uint8Array): string {
+  return strFromU8(inflateSync(bytes));
+}
+
+/* technical details shown under an error, so a screenshot says what went wrong */
+export function diagnostico(texto: string): string {
+  const m = RE.exec(texto), c = m?.[1] ?? "";
+  const b = /^B(d+)L([a-z2-7]*)/.exec(c);
+  const partes = [`app ${__VERSAO__}`, `código ${c.length}`];
+  if (b) partes.push(`esperado ${b[1]} bytes, chegou ${Math.floor((b[2].length * 5) / 8)}`, `resto "${c.slice(2 + b[1].length + b[2].length, 2 + b[1].length + b[2].length + 12)}"`);
+  else partes.push(`formato ${c ? "antigo" : "nenhum"}`);
+  partes.push(`início "${c.slice(0, 14)}" fim "${c.slice(-10)}"`, `texto ${texto.length}`);
+  return partes.join(" · ");
 }
 
 /* finds the code anywhere in a link or a pasted message and opens it;
@@ -73,13 +81,10 @@ export async function lerRoteiro(texto: string): Promise<RoteiroRecebido> {
     throw new Error("O link do roteiro chegou alterado. Peça para reenviar a mensagem.");
   }
   let json: string;
-  try { json = await inflar(bytes); }
-  catch (e) {
-    if ((e as Error).message.startsWith("Este navegador")) throw e;
-    throw new Error("O roteiro chegou cortado ou com defeito. Peça para reenviar a mensagem.");
-  }
+  try { json = inflar(bytes); }
+  catch { throw new Error("O roteiro chegou com defeito (não consegui descompactar). Peça para reenviar a mensagem."); }
   try { j = JSON.parse(json); }
-  catch { throw new Error("O roteiro chegou cortado ou com defeito. Peça para reenviar a mensagem."); }
+  catch { throw new Error("O roteiro chegou com defeito (dados ilegíveis). Peça para reenviar a mensagem."); }
   if (j.app !== APP || !Array.isArray(j.eventos) || typeof j.em !== "string")
     throw new Error("Esse link não é um roteiro do planejador da viagem.");
   if ((j.v ?? 0) > 1) throw new Error("Esse roteiro foi feito por uma versão mais nova. Atualize o app (com internet) e tente de novo.");

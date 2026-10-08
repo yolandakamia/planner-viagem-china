@@ -4,16 +4,18 @@ import { useDadosViagem } from "../db/useViagem";
 import { TIPOS } from "../db/eventos";
 import { CartaoEvento, useEventosFolha } from "../comp/Eventos";
 import { LookDoDia } from "../comp/LookDoDia";
+import { VistaSemana, VistaMes } from "../comp/Grades";
 import type { Dia } from "../db/tipos";
 import { conflitos } from "../lib/tempo";
 import { dataLonga, diaSemana, somaDias, hojeDaViagem, listaDias } from "../lib/datas";
 
 /* the chosen day and view survive switching tabs (not reloads) */
-let memoria: { modo: "dia" | "viagem"; data: string | null } = { modo: "dia", data: null };
+type Modo = "dia" | "semana" | "mes" | "viagem";
+let memoria: { modo: Modo; data: string | null } = { modo: "dia", data: null };
 
 export function Calendario({ viagem }: { viagem: Viagem }) {
   const { dias, eventos, pronto, cidade, doDia } = useDadosViagem(viagem);
-  const [modo, setModo] = useState(memoria.modo);
+  const [modo, setModo] = useState<Modo>(memoria.modo);
   const hoje = hojeDaViagem(dias);
   const padrao = hoje < viagem.inicio ? viagem.inicio : hoje > viagem.fim ? viagem.fim : hoje;
   /* null = "today" — resolved only once the days are loaded */
@@ -30,18 +32,19 @@ export function Calendario({ viagem }: { viagem: Viagem }) {
   }, [viagem, eventos]);
 
   if (!pronto) return null;
+  const irPara = (d: string) => { setData(d); setModo("dia"); scrollTo(0, 0); };
   return (
     <>
       <div class="seg" role="tablist">
-        <button role="tab" aria-selected={modo === "dia"} class={modo === "dia" ? "on" : ""} onClick={() => setModo("dia")}>Dia</button>
-        <button role="tab" aria-selected={modo === "viagem"} class={modo === "viagem" ? "on" : ""} onClick={() => setModo("viagem")}>Viagem inteira</button>
+        {([["dia", "Dia"], ["semana", "Semana"], ["mes", "Mês"], ["viagem", "Viagem"]] as [Modo, string][]).map(([m, r]) => (
+          <button role="tab" aria-selected={modo === m} class={modo === m ? "on" : ""} onClick={() => setModo(m)}>{r}</button>))}
       </div>
-      {modo === "dia"
-        ? <VistaDia data={data} setData={setData} datas={datas} hoje={hoje} cidade={cidade(data)} dia={dias.find((d) => d.data === data)}
-            evs={doDia(data)} abrir={folha.abrir} />
-        : <VistaViagem datas={datas} hoje={hoje} cidade={cidade} doDia={doDia}
-            irPara={(d) => { setData(d); setModo("dia"); scrollTo(0, 0); }} />}
-      <button class="fab" aria-label="Novo evento" onClick={() => folha.novo(modo === "dia" ? data : padrao)}>＋</button>
+      {modo === "dia" && <VistaDia data={data} setData={setData} datas={datas} hoje={hoje} cidade={cidade(data)} dia={dias.find((d) => d.data === data)}
+            evs={doDia(data)} abrir={folha.abrir} />}
+      {modo === "semana" && <VistaSemana data={data} setData={setData} hoje={hoje} cidade={cidade} doDia={doDia} abrir={folha.abrir} novo={folha.novo} />}
+      {modo === "mes" && <VistaMes datas={datas} inicio={viagem.inicio} fim={viagem.fim} hoje={hoje} cidade={cidade} doDia={doDia} irPara={irPara} />}
+      {modo === "viagem" && <VistaViagem datas={datas} hoje={hoje} cidade={cidade} doDia={doDia} irPara={irPara} />}
+      <button class="fab" aria-label="Novo evento" onClick={() => folha.novo(modo === "dia" || modo === "semana" ? data : padrao)}>＋</button>
       {folha.elemento}
     </>
   );

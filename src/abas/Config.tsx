@@ -85,6 +85,7 @@ export function Config({ viagem, aoSalvar }: { viagem: Viagem; aoSalvar: (v: Via
           publicado (o do GitHub Pages) — o que você digitar em outro endereço fica em outro lugar.
           As fotos nunca saem do celular.
         </p>
+        <p class="pequeno muted" style="margin:10px 0 0">Versão do app: <b>{__VERSAO__}</b></p>
         <p class="pequeno" style="margin:10px 0 0">📷 <b>{fotos.n}</b> {fotos.n === 1 ? "foto" : "fotos"} · <b>{tamanho(fotos.bytes)}</b>
           {livre && <span class="muted"> · {livre} livres para o app</span>}</p>
       </div>

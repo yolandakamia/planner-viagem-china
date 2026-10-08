@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import type { Meta } from "../db/tipos";
 import { useVersaoDados } from "../db/mudancas";
 import { previa, importar, versaoAtual, type Previa } from "../lib/importarPlanner";
-import { lerRoteiro, quandoRoteiro, temRoteiro, ehIOS, instalado, type RoteiroRecebido } from "../lib/roteiro";
+import { lerRoteiro, quandoRoteiro, temRoteiro, ehIOS, instalado, diagnostico, type RoteiroRecebido } from "../lib/roteiro";
 import { Folha } from "./Folha";
 
 export function useRoteiroAtual() {
@@ -54,7 +54,9 @@ export function ReceberRoteiro({ texto, aoFechar }: { texto: string; aoFechar: (
       <button class="btn" onClick={aoFechar}>Cancelar</button>
       <button class="btn primario" disabled={!p} onClick={atualizar}>{antiga ? "Usar mesmo assim" : "Atualizar roteiro"}</button>
     </>}>
-      {erro && <p style="color:var(--aviso)">{erro}</p>}
+      {erro && <><p style="color:var(--aviso)">{erro}</p>
+        <p class="muted pequeno" style="word-break:break-all">Detalhes (para o print): {diagnostico(texto)}</p>
+        <p class="pequeno">Tente também: copie a mensagem inteira e toque em <b>📋 Colar roteiro</b>.</p></>}
       {!erro && !r && <p class="muted"><span class="giro giro-peq" /> Abrindo o roteiro…</p>}
       {r && (<>
         <p>Roteiro de <b>{quandoRoteiro(r.versao.em)}</b>{r.versao.plano && <span class="muted"> · {r.versao.plano}</span>}</p>
