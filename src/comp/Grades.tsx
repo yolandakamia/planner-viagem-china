@@ -93,7 +93,7 @@ export function VistaSemana({ data, setData, hoje, cidade, doDia, abrir, novo }:
           <div class="sem-todo">
             <div class="sem-hora">dia todo</div>
             {todoDia.map((l) => <div>{l.map((e) => (
-              <button class={`sem-chip t-${e.tipo}`} onClick={() => abrir(e)}>{TIPOS[e.tipo]?.emo} {e.titulo}</button>))}</div>)}
+              <button class={`sem-chip t-${e.tipo}`} onClick={() => abrir(e)}>{e.camada === "coletivo" ? "👥" : "👤"} {TIPOS[e.tipo]?.emo} {e.titulo}</button>))}</div>)}
           </div>)}
         <div class="sem-corpo" style={`height:${horas.length * PX_HORA}px`}>
           <div class="sem-horas">{horas.map((h) => <div class="sem-hora" style={`top:${(h - h0) * PX_HORA}px`}>{h}h</div>)}</div>
@@ -111,7 +111,7 @@ export function VistaSemana({ data, setData, hoje, cidade, doDia, abrir, novo }:
                   <button class={`sem-ev t-${b.e.tipo} ${choque.has(b.e.id) ? "choque" : ""}`} onClick={() => abrir(b.e)}
                     style={`top:${((b.ini - h0 * 60) / 60) * PX_HORA}px;height:${((b.fim - b.ini) / 60) * PX_HORA - 2}px;` +
                       `left:calc(${(b.col / b.cols) * 100}% + 1px);width:calc(${100 / b.cols}% - 3px)`}>
-                    <b>{b.e.horaInicio}</b> {b.e.titulo}
+                    <b>{b.e.horaInicio} <span class="camada-ic">{b.e.camada === "coletivo" ? "👥" : "👤"}</span></b> {b.e.titulo}
                   </button>))}
               </div>);
           })}
@@ -150,7 +150,7 @@ export function VistaMes({ datas, inicio, fim, hoje, cidade, doDia, irPara }: {
                 <span class="mes-num">{+d.slice(8)}</span>
                 {naViagem && c && <span class="mes-cid">{c}</span>}
                 {evs.slice(0, 3).map((e) => (
-                  <span class={`mes-ev t-${e.tipo}`}>{e.horaInicio && <b>{e.horaInicio.replace(/:00$/, "h")} </b>}{e.titulo}</span>))}
+                  <span class={`mes-ev t-${e.tipo} ${e.camada === "coletivo" ? "" : "mes-pessoal"}`}>{e.camada === "coletivo" ? "👥" : "👤"}{e.horaInicio && <b>{e.horaInicio.replace(/:00$/, "h")} </b>}{e.titulo}</span>))}
                 {evs.length > 3 && <span class="mes-mais">+{evs.length - 3}</span>}
               </button>);
           })}

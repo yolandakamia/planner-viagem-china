@@ -9,7 +9,7 @@ no celular, funciona **100% offline**.
 | Aba | O que faz |
 |---|---|
 | **Hoje** | Relógios da China e do Brasil, dia da viagem pelo horário da China, versão do roteiro, look do dia, eventos com **Agora** e **A seguir** |
-| **Calendário** | Dia a dia ou a viagem inteira; criar, editar, duplicar e excluir eventos; conflitos de horário; endereço em chinês em tela cheia |
+| **Calendário** | Dia, Semana (com horários), Mês ou a viagem inteira; eventos 👥 do grupo e 👤 pessoais; criar, editar, duplicar e excluir eventos; conflitos de horário; endereço em chinês em tela cheia |
 | **Mala** | Malas com peso e limite, itens com status e foto, lista sugerida para a China, modo volta (compras, amostras, catálogos) |
 | **Looks** | Provador com as fotos das roupas, looks por dia, contagem de uso das peças e dias de lavanderia |
 | **Ajustes** | Backup, dados da viagem, cidade de cada dia, roteiro da viagem (colar ou importar do `China_Trip_Planner.html`) |
@@ -30,27 +30,38 @@ Abra pelo ícone e espere aparecer **"✓ Pronto para usar offline"**.
 - **Nada é enviado a servidor nenhum**, nem as fotos. Cada pessoa que instala o app tem os próprios dados.
 - **Faça backup** (Ajustes → Backup). O app lembra na página Hoje se passar de 7 dias.
 
-## Roteiro da viagem (enviado pelo planejador)
+## Roteiro do grupo (👥) e eventos pessoais (👤)
 
-O roteiro coletivo sai do `China_Trip_Planner.html` e chega ao app **por mensagem**, sem publicar nada:
+Todo evento é **👥 do grupo** ou **👤 pessoal**, e isso aparece em todos os lugares: etiqueta nos cartões,
+ícone na Semana e no Mês, e uma faixa no detalhe ("👥 Evento do grupo · do planejador / criado por Ana").
+No editor, **"Para quem? 👤 Só eu / 👥 Grupo"** (dá para mudar depois).
 
-1. No planejador, clique em **📤 Share itinerary**. Sai o **plano principal ★**, sem os eventos cancelados.
-   Um ponto laranja no botão avisa que o roteiro mudou desde o último envio.
-2. **WhatsApp** abre o WhatsApp com a mensagem pronta: escolha o grupo ou a pessoa e aperte **Enviar**.
-   (**WhatsApp Web** se o aplicativo não estiver instalado; **WeChat** copia a mensagem para colar no chat.)
-3. Quem recebe:
-   - **Android:** toca no link → o app abre e pergunta **"Atualizar roteiro?"**.
-   - **iPhone:** copia a mensagem inteira, abre o app e toca em **📋 Colar roteiro** (página Hoje ou Ajustes).
-     O iOS abre links no Safari, que guarda os dados separado do app da Tela de Início.
+O roteiro do grupo vai e vem **por mensagem** (WhatsApp ou WeChat), sem servidor e sem publicar nada:
 
-- O roteiro vai **dentro do link**, depois do `#` — essa parte não é enviada a servidor nenhum.
-  Só quem recebeu a mensagem tem o roteiro.
-- Cada versão **substitui** a anterior: eventos atualizados no lugar, novos criados, os que saíram do
-  planejamento removidos. **Eventos criados no app (pessoais) nunca são alterados.**
-- A página Hoje mostra **"Roteiro de qua 14/10 15:20"**: dá para comparar com a última mensagem do grupo.
-  Um link mais antigo que o do app é avisado antes de usar. O app não tem como saber sozinho que
-  existe uma versão nova (não há servidor): quem manda o roteiro avisa no grupo.
-- Ainda dá para importar o **⬇ Backup .json** do planejador (Ajustes → Roteiro da viagem), com o mesmo efeito.
+- **Do computador:** no planejador, **📤 Share itinerary** → WhatsApp / WhatsApp Web / WeChat (copiar).
+  Sai o **plano principal ★**, sem os cancelados. O botão mostra **"· changed"** quando há mudança não enviada.
+- **Do celular:** **📤 Enviar** (página Hoje ou Ajustes → Roteiro do grupo) → Compartilhar… (WhatsApp,
+  WeChat…), WhatsApp ou Copiar. **Os eventos pessoais nunca vão.**
+- **Quem recebe:** no Android toca no link; no iPhone copia a mensagem inteira e toca em **📋 Colar**
+  (o iOS abre links no Safari, que guarda os dados separado do app da Tela de Início).
+  O planejador recebe colando a mensagem em **📤 Share itinerary → "Received an itinerary from the group?"**.
+- Antes de aplicar, aparece a lista do que muda: **+ novo**, **✎ atualizado**, **− excluído**.
+
+Regras (`src/lib/grupo.ts`):
+
+- Cada evento do grupo tem um `ref` igual em todos os aparelhos (`planner:<id>` ou `app:<uuid>`) e uma
+  versão (`editadoEm`). Receber **junta evento por evento**: entra o que é novo e, quando o mesmo evento
+  existe nos dois lados, fica a versão mais recente.
+- **Excluir viaja na mensagem:** quem recebe perde o evento também (a não ser que o tenha editado depois).
+  Uma mensagem antiga não traz de volta o que foi excluído.
+- A mensagem do planejador leva **todos** os eventos dele: um evento do planejador que não está nela foi
+  excluído (ou cancelado) lá e sai dos celulares. Eventos criados nos celulares não saem por isso.
+- **Só os eventos do grupo mudam.** Eventos pessoais nunca são enviados nem alterados.
+- **Alerta:** quem cria, edita ou exclui um evento do grupo vê **"📤 Você mudou o roteiro do grupo. Mande a
+  versão atualizada para todos."** (Hoje e Calendário) até enviar.
+- O roteiro vai **dentro do link**, depois do `#`, que não é enviado a servidor nenhum.
+- O app não sabe sozinho que existe versão nova (não há servidor): quem muda, envia.
+- O **⬇ Backup .json** do planejador também pode ser importado (Ajustes), com as mesmas regras.
 
 ## Backup
 
@@ -107,8 +118,8 @@ usuário (`P&D01`) quebra os atalhos `.cmd` do npm no Windows.
 - Toda mudança de estrutura é **uma nova migração no fim da lista**, que transforma os dados existentes.
 - **Nunca** apagar ou recriar o banco ou uma store.
 - Campos novos entram como opcionais; o backup aceita arquivos de versões anteriores.
-- Todo registro tem `id` UUID estável. Eventos têm `camada`: `pessoal` (criados no app) ou `coletivo`
-  (o roteiro do planejador, ligado pelo `ref` `planner:<id>`). Um roteiro novo só mexe nos `coletivo`.
+- Todo registro tem `id` UUID estável. Eventos têm `camada`: `pessoal` (só do aparelho) ou `coletivo`
+  (o roteiro do grupo, ligado pelo `ref` `planner:<id>` / `app:<uuid>`). Receber um roteiro só mexe nos `coletivo`.
 
 ## Bibliotecas (tudo empacotado no app; nada vem de CDN)
 

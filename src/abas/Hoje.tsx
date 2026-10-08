@@ -5,7 +5,7 @@ import { CartaoEvento, useEventosFolha } from "../comp/Eventos";
 import { situacoes } from "../lib/agora";
 import { LookDoDia } from "../comp/LookDoDia";
 import { LembreteBackup } from "../comp/Backup";
-import { LinhaRoteiro } from "../comp/Roteiro";
+import { LinhaRoteiro, AvisoEnviar } from "../comp/Roteiro";
 import { conflitos } from "../lib/tempo";
 import {
   FUSO_BRASIL, FUSO_CHINA, hojeEm, horaEm, dataLonga, dataCurta, diferencaDias,
@@ -43,6 +43,7 @@ export function Hoje({ viagem }: { viagem: Viagem }) {
 
   return (
     <>
+      <AvisoEnviar />
       <LembreteBackup />
       <div class="relogios">
         <div class="relogio"><div class="h">{horaEm(FUSO_CHINA, agora)}</div><div class="l">🇨🇳 China · {dataCurta(hojeEm(FUSO_CHINA, agora))}</div></div>

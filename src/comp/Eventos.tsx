@@ -4,6 +4,16 @@ import { TIPOS, novoEvento, salvarEvento, excluirEvento, copiaDeEvento } from ".
 import { FUSO_CHINA, FUSO_BRASIL, dataLonga, cidadeNoBrasil } from "../lib/datas";
 import { FUSOS, rotuloFuso, outroRelogio } from "../lib/tempo";
 import { Folha } from "./Folha";
+import { ondeEvento } from "../lib/grupo";
+import { quandoRoteiro } from "../lib/roteiro";
+
+/* 👥 group / 👤 personal: shown on every card, block and chip */
+export const ehDoGrupo = (e: Evento) => e.camada === "coletivo";
+export function SeloCamada({ e }: { e: Evento }) {
+  return ehDoGrupo(e)
+    ? <span class="tag tag-grupo" title="Evento do grupo">👥 Grupo</span>
+    : <span class="tag tag-pessoal" title="Evento só seu">👤 Pessoal</span>;
+}
 
 export type Situacao = "agora" | "seguir" | "passado" | "";
 
@@ -23,7 +33,8 @@ export function CartaoEvento({ e, situacao = "", conflito = false, resto = "", a
         <div class="ev-info">
           {e.fuso !== FUSO_CHINA && e.horaInicio && <span class="tag">🕒 {rotuloFuso(e.fuso)}</span>}
           {conflito && <span class="tag tag-aviso">⚠️ conflito de horário</span>}
-          {e.local && <span class="ev-local">{e.local}</span>}
+          <SeloCamada e={e} />
+          {ondeEvento(e) && <span class="ev-local">{ondeEvento(e)}</span>}
         </div>
       </div>
     </button>
@@ -35,7 +46,7 @@ export function EnderecoCheio({ e, aoFechar }: { e: Evento; aoFechar: () => void
   return (
     <div class="endereco-cheio" role="dialog" aria-label="Endereço em chinês" onClick={aoFechar}>
       <div class="ec-cn" lang="zh-CN">{e.enderecoCn}</div>
-      {e.local && <div class="ec-local">{e.local}</div>}
+      {ondeEvento(e) && <div class="ec-local">{ondeEvento(e)}</div>}
       <div class="ec-dica">请带我去这个地址 · Toque para fechar</div>
     </div>
   );
@@ -50,7 +61,11 @@ function Detalhe({ e, aoEditar, aoFechar, aoDuplicar }: {
   const outro = outroRelogio(e);
   const hora = e.horaInicio ? e.horaInicio + (e.horaFim ? `–${e.horaFim}` : "") : "Dia todo";
   async function excluir() {
-    if (!confirm(`Excluir "${e.titulo || "evento"}"?`)) return;
+    if (!confirm(ehDoGrupo(e)
+      ? `Excluir "${e.titulo || "evento"}" do roteiro do GRUPO?
+
+Ele some do celular de todos quando você compartilhar o roteiro atualizado.`
+      : `Excluir "${e.titulo || "evento"}"?`)) return;
     await excluirEvento(e.id); aoFechar();
   }
   return (
@@ -63,7 +78,12 @@ function Detalhe({ e, aoEditar, aoFechar, aoDuplicar }: {
       <p class="det-quando">{dataLonga(e.data)} · <b>{hora}</b>
         {e.horaInicio && <span class="muted"> ({rotuloFuso(e.fuso)})</span>}</p>
       {outro && <p class="det-outro">{outro.rot}: {outro.texto}</p>}
-      {e.local && <p>📍 {e.local}</p>}
+      <p class={`det-camada ${ehDoGrupo(e) ? "grupo" : "pessoal"}`}>{ehDoGrupo(e)
+        ? <>👥 <b>Evento do grupo</b> · {e.autor && e.autor !== "planejador" ? <>criado por {e.autor}</> : e.ref?.startsWith("planner:") ? "do planejador" : "criado no app"}
+            {e.editadoEm && <span class="muted"> · versão de {quandoRoteiro(e.editadoEm)}</span>}</>
+        : <>👤 <b>Evento pessoal</b> · só neste celular, não vai para o grupo</>}</p>
+      {ondeEvento(e) && <p>📍 {ondeEvento(e)}</p>}
+      {(e.empresa || e.status) && <p class="muted pequeno">{[e.empresa && `🏢 ${e.empresa}`, e.status && `Status: ${e.status}`].filter(Boolean).join(" · ")}</p>}
       {e.enderecoCn && (
         <button class="endereco-cn" lang="zh-CN" onClick={() => setCheio(true)}>
           <span class="muted pequeno">Endereço em chinês — toque para mostrar ao taxista</span>
@@ -71,8 +91,6 @@ function Detalhe({ e, aoEditar, aoFechar, aoDuplicar }: {
         </button>
       )}
       {e.obs && <p class="det-obs">{e.obs}</p>}
-      {e.camada === "coletivo" && <p class="muted pequeno">📌 Do roteiro da viagem. Uma mudança feita aqui é desfeita quando chegar
-        um roteiro novo; para ter uma versão só sua, use <b>Duplicar</b>.</p>}
       {cheio && <EnderecoCheio e={e} aoFechar={() => setCheio(false)} />}
     </Folha>
   );
@@ -95,6 +113,15 @@ function Editor({ inicial, novo, aoFechar }: { inicial: Evento; novo: boolean; a
         <button class="btn" onClick={aoFechar}>Cancelar</button>
         <button class="btn primario" disabled={!ok} onClick={salvar}>Salvar</button>
       </>}>
+      <div class="campo"><label>Para quem?</label>
+        <div class="seg seg-camada" role="radiogroup">
+          <button type="button" role="radio" aria-checked={e.camada === "pessoal"} class={e.camada === "pessoal" ? "on" : ""} onClick={() => set("camada", "pessoal")}>👤 Só eu</button>
+          <button type="button" role="radio" aria-checked={e.camada === "coletivo"} class={e.camada === "coletivo" ? "on" : ""} onClick={() => set("camada", "coletivo")}>👥 Grupo</button>
+        </div>
+        <span class="muted pequeno">{e.camada === "coletivo"
+          ? (inicial.camada === "coletivo" ? "Evento do grupo: a mudança vai para todos quando você compartilhar o roteiro." : "Vai para o roteiro do grupo quando você compartilhar o roteiro.")
+          : (inicial.camada === "coletivo" ? "Deixa de ser do grupo: some do celular dos outros quando você compartilhar o roteiro." : "Fica só neste celular.")}</span>
+      </div>
       <div class="campo"><label for="e-tit">Título</label>
         <input id="e-tit" value={e.titulo} onInput={(x) => set("titulo", val(x))} placeholder="Ex.: Visita à Chainway" /></div>
       <div class="campo"><label>Tipo</label>

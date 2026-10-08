@@ -12,7 +12,12 @@ export interface Meta {
   instaladoEm: string;          // ISO timestamp
   ultimoBackup: string | null;  // ISO timestamp
   /* the trip itinerary last received from the planner (link, pasted text or file) */
-  roteiro?: { em: string; recebidoEm: string; plano: string };
+  roteiro?: { em: string; recebidoEm: string; plano: string; de?: string };
+  /* group events deleted here or received as deleted: they travel in every
+     itinerary this phone sends, so the deletion reaches everyone */
+  excluidos?: { ref: string; em: string }[];
+  /* changes to the group itinerary not sent yet (the "send it to everyone" alert) */
+  pendente?: { desde: string; n: number } | null;
 }
 
 export interface Viagem {
@@ -54,6 +59,15 @@ export interface Evento {
   local: string;
   enderecoCn: string;
   obs: string;
+  /* group events only: version for merging (last edit, ISO) and who made it */
+  editadoEm?: string;
+  autor?: string;
+  /* planner fields kept as they came, so sending the event back loses nothing */
+  tipoOrig?: string;
+  empresa?: string;
+  status?: string;
+  cidade?: string;
+  endereco?: string;
   criadoEm: string;
   atualizadoEm: string;
 }

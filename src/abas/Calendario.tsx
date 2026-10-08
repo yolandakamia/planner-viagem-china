@@ -5,6 +5,7 @@ import { TIPOS } from "../db/eventos";
 import { CartaoEvento, useEventosFolha } from "../comp/Eventos";
 import { LookDoDia } from "../comp/LookDoDia";
 import { VistaSemana, VistaMes } from "../comp/Grades";
+import { AvisoEnviar } from "../comp/Roteiro";
 import type { Dia } from "../db/tipos";
 import { conflitos } from "../lib/tempo";
 import { dataLonga, diaSemana, somaDias, hojeDaViagem, listaDias } from "../lib/datas";
@@ -35,6 +36,7 @@ export function Calendario({ viagem }: { viagem: Viagem }) {
   const irPara = (d: string) => { setData(d); setModo("dia"); scrollTo(0, 0); };
   return (
     <>
+      <AvisoEnviar />
       <div class="seg" role="tablist">
         {([["dia", "Dia"], ["semana", "Semana"], ["mes", "Mês"], ["viagem", "Viagem"]] as [Modo, string][]).map(([m, r]) => (
           <button role="tab" aria-selected={modo === m} class={modo === m ? "on" : ""} onClick={() => setModo(m)}>{r}</button>))}
@@ -114,7 +116,7 @@ function VistaViagem({ datas, hoje, cidade, doDia, irPara }: {
                 {choque.size > 0 && <span class="tag tag-aviso">⚠️ conflito</span>}</div>
               {evs.length === 0 && <div class="muted pequeno">sem eventos</div>}
               {evs.slice(0, 4).map((e) => (
-                <div class="rd-ev"><span class={`rd-h ${e.horaInicio ? "" : "rd-todo"}`}>{e.horaInicio || "dia todo"}</span> {TIPOS[e.tipo]?.emo} {e.titulo}</div>))}
+                <div class="rd-ev"><span class={`rd-h ${e.horaInicio ? "" : "rd-todo"}`}>{e.horaInicio || "dia todo"}</span> {TIPOS[e.tipo]?.emo} {e.titulo} <span class="camada-ic" title={e.camada === "coletivo" ? "Grupo" : "Pessoal"}>{e.camada === "coletivo" ? "👥" : "👤"}</span></div>))}
               {evs.length > 4 && <div class="muted pequeno">+ {evs.length - 4} eventos</div>}
             </div>
           </button>);
