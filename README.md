@@ -8,11 +8,11 @@ no celular, funciona **100% offline**.
 
 | Aba | O que faz |
 |---|---|
-| **Hoje** | Relógios da China e do Brasil, dia da viagem pelo horário da China, look do dia, eventos com **Agora** e **A seguir** |
+| **Hoje** | Relógios da China e do Brasil, dia da viagem pelo horário da China, versão do roteiro, look do dia, eventos com **Agora** e **A seguir** |
 | **Calendário** | Dia a dia ou a viagem inteira; criar, editar, duplicar e excluir eventos; conflitos de horário; endereço em chinês em tela cheia |
 | **Mala** | Malas com peso e limite, itens com status e foto, lista sugerida para a China, modo volta (compras, amostras, catálogos) |
 | **Looks** | Provador com as fotos das roupas, looks por dia, contagem de uso das peças e dias de lavanderia |
-| **Ajustes** | Backup, dados da viagem, cidade de cada dia, importação do `China_Trip_Planner.html` |
+| **Ajustes** | Backup, dados da viagem, cidade de cada dia, roteiro da viagem (colar ou importar do `China_Trip_Planner.html`) |
 
 ## Instalar no celular
 
@@ -29,6 +29,28 @@ Abra pelo ícone e espere aparecer **"✓ Pronto para usar offline"**.
   Use sempre o link publicado. O que for digitado no `localhost` ou em outro endereço fica em outro lugar.
 - **Nada é enviado a servidor nenhum**, nem as fotos. Cada pessoa que instala o app tem os próprios dados.
 - **Faça backup** (Ajustes → Backup). O app lembra na página Hoje se passar de 7 dias.
+
+## Roteiro da viagem (enviado pelo planejador)
+
+O roteiro coletivo sai do `China_Trip_Planner.html` e chega ao app **por mensagem**, sem publicar nada:
+
+1. No planejador, clique em **📤 Share itinerary**. Sai o **plano principal ★**, sem os eventos cancelados.
+   Um ponto laranja no botão avisa que o roteiro mudou desde o último envio.
+2. **WhatsApp** abre o WhatsApp com a mensagem pronta: escolha o grupo ou a pessoa e aperte **Enviar**.
+   (**WhatsApp Web** se o aplicativo não estiver instalado; **WeChat** copia a mensagem para colar no chat.)
+3. Quem recebe:
+   - **Android:** toca no link → o app abre e pergunta **"Atualizar roteiro?"**.
+   - **iPhone:** copia a mensagem inteira, abre o app e toca em **📋 Colar roteiro** (página Hoje ou Ajustes).
+     O iOS abre links no Safari, que guarda os dados separado do app da Tela de Início.
+
+- O roteiro vai **dentro do link**, depois do `#` — essa parte não é enviada a servidor nenhum.
+  Só quem recebeu a mensagem tem o roteiro.
+- Cada versão **substitui** a anterior: eventos atualizados no lugar, novos criados, os que saíram do
+  planejamento removidos. **Eventos criados no app (pessoais) nunca são alterados.**
+- A página Hoje mostra **"Roteiro de qua 14/10 15:20"**: dá para comparar com a última mensagem do grupo.
+  Um link mais antigo que o do app é avisado antes de usar. O app não tem como saber sozinho que
+  existe uma versão nova (não há servidor): quem manda o roteiro avisa no grupo.
+- Ainda dá para importar o **⬇ Backup .json** do planejador (Ajustes → Roteiro da viagem), com o mesmo efeito.
 
 ## Backup
 
@@ -85,8 +107,8 @@ usuário (`P&D01`) quebra os atalhos `.cmd` do npm no Windows.
 - Toda mudança de estrutura é **uma nova migração no fim da lista**, que transforma os dados existentes.
 - **Nunca** apagar ou recriar o banco ou uma store.
 - Campos novos entram como opcionais; o backup aceita arquivos de versões anteriores.
-- Todo registro tem `id` UUID estável. Eventos têm `camada` (`pessoal` hoje; `coletivo` virá do
-  `dados.json` e **nunca** sobrescreve dados pessoais).
+- Todo registro tem `id` UUID estável. Eventos têm `camada`: `pessoal` (criados no app) ou `coletivo`
+  (o roteiro do planejador, ligado pelo `ref` `planner:<id>`). Um roteiro novo só mexe nos `coletivo`.
 
 ## Bibliotecas (tudo empacotado no app; nada vem de CDN)
 
@@ -111,4 +133,4 @@ Fontes do sistema (PingFang no iPhone, Noto Sans CJK no Android) para os caracte
 - Remover o fundo das fotos é feito fora do app (recurso de recorte do iPhone/Android); o app
   aceita PNG já recortado ou foto comum.
 - Se o navegador não gerar WebP (Safari antigo), as fotos são salvas em PNG.
-- A seção "Importar do planejador" lê o Backup .json do `China_Trip_Planner.html`.
+- Colar o roteiro exige iOS 16.4+ ou Chrome/Android recente (descompressão nativa do navegador).

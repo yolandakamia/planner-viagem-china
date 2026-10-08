@@ -5,6 +5,7 @@ import { CartaoEvento, useEventosFolha } from "../comp/Eventos";
 import { situacoes } from "../lib/agora";
 import { LookDoDia } from "../comp/LookDoDia";
 import { LembreteBackup } from "../comp/Backup";
+import { LinhaRoteiro } from "../comp/Roteiro";
 import { conflitos } from "../lib/tempo";
 import {
   FUSO_BRASIL, FUSO_CHINA, hojeEm, horaEm, dataLonga, dataCurta, diferencaDias,
@@ -69,6 +70,7 @@ export function Hoje({ viagem }: { viagem: Viagem }) {
         </div>
       )}
 
+      <LinhaRoteiro />
       <LookDoDia dia={dias.find((d) => d.data === diaRef)} />
 
       <h3 class="secao">{antes ? "Programação do primeiro dia" : depois ? "Programação do último dia" : "Programação de hoje"}</h3>

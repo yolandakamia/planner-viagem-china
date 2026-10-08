@@ -9,6 +9,8 @@ import { Config } from "./abas/Config";
 import { Calendario } from "./abas/Calendario";
 import { MalaAba } from "./abas/Mala";
 import { LooksAba } from "./abas/Looks";
+import { ReceberRoteiro } from "./comp/Roteiro";
+import { temRoteiro } from "./lib/roteiro";
 
 /* Tabs live in the hash (#/hoje …): no server routing needed on GitHub Pages,
    and the Android back button moves between tabs. */
@@ -30,9 +32,16 @@ export function App() {
   const [aba, setAba] = useState<IdAba>(abaDoHash);
   const [viagem, setViagem] = useState<Viagem | null>(null);
   const [erro, setErro] = useState("");
+  /* an itinerary link (#roteiro=…): keep it, and clean the address so a
+     reload or a bookmark does not offer it again */
+  const [roteiro, setRoteiro] = useState<string | null>(null);
 
   useEffect(() => {
-    const f = () => setAba(abaDoHash());
+    const f = () => {
+      if (temRoteiro(location.hash)) { setRoteiro(location.href); history.replaceState(null, "", "#/hoje"); }
+      setAba(abaDoHash());
+    };
+    f();
     addEventListener("hashchange", f);
     return () => removeEventListener("hashchange", f);
   }, []);
@@ -68,6 +77,7 @@ export function App() {
         </nav>
       </div>
       <AvisoAtualizacao />
+      {roteiro && <ReceberRoteiro key={roteiro} texto={roteiro} aoFechar={() => setRoteiro(null)} />}
     </div>
   );
 }

@@ -11,6 +11,8 @@ export interface Meta {
   schemaVersion: number;
   instaladoEm: string;          // ISO timestamp
   ultimoBackup: string | null;  // ISO timestamp
+  /* the trip itinerary last received from the planner (link, pasted text or file) */
+  roteiro?: { em: string; recebidoEm: string; plano: string };
 }
 
 export interface Viagem {
@@ -36,12 +38,12 @@ export type TipoEvento = "feira" | "reuniao" | "deslocamento" | "refeicao" | "li
 
 export interface Evento {
   id: string;
-  /* "coletivo" records will come from dados.json and be matched by origemId;
-     the sync may only touch coletivo records, never pessoal ones. */
+  /* "coletivo" = the shared itinerary sent from the planner, matched by ref;
+     receiving a new itinerary only touches coletivo records, never pessoal. */
   camada: Camada;
   origemId: string | null;
-  /* where a personal event was imported from ("planner:<id>"), so importing
-     again updates it instead of duplicating; null for events typed here */
+  /* planner event it came from ("planner:<id>[:date]"), so a new version of
+     the itinerary updates it instead of duplicating; null for events typed here */
   ref?: string | null;
   data: ISODate;
   horaInicio: HHMM | "";

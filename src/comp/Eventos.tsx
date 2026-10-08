@@ -71,6 +71,8 @@ function Detalhe({ e, aoEditar, aoFechar, aoDuplicar }: {
         </button>
       )}
       {e.obs && <p class="det-obs">{e.obs}</p>}
+      {e.camada === "coletivo" && <p class="muted pequeno">📌 Do roteiro da viagem. Uma mudança feita aqui é desfeita quando chegar
+        um roteiro novo; para ter uma versão só sua, use <b>Duplicar</b>.</p>}
       {cheio && <EnderecoCheio e={e} aoFechar={() => setCheio(false)} />}
     </Folha>
   );
