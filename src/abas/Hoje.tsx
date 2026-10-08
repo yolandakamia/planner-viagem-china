@@ -73,7 +73,6 @@ export function Hoje({ viagem }: { viagem: Viagem }) {
       )}
 
       <LinhaRoteiro />
-      <LookDoDia dia={dias.find((d) => d.data === diaRef)} />
 
       <h3 class="secao">{antes ? t("Programação do primeiro dia") : depois ? t("Programação do último dia") : t("Programação de hoje")}</h3>
       {choque.size > 0 && <div class="faixa-aviso">⚠️ {t("Há eventos com horários sobrepostos.")}</div>}
@@ -87,6 +86,7 @@ export function Hoje({ viagem }: { viagem: Viagem }) {
         <h3 class="secao">{t("Amanhã")} · {dataCurta(somaDias(hoje, 1))}</h3>
         <div class="lista-ev">{amanha.map((e) => <CartaoEvento e={e} aoAbrir={folha.abrir} />)}</div>
       </>)}
+      <div class="look-hoje"><LookDoDia dia={dias.find((d) => d.data === diaRef)} /></div>
       {folha.elemento}
     </>
   );

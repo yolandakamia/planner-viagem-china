@@ -82,3 +82,4 @@
 .perigo { margin-top: 16px; border-top: 1px solid var(--linha); padding-top: 10px; }
 .perigo summary { cursor: pointer; color: var(--texto-2); font-size: 14px; min-height: 32px; }
 .giro-peq { display: inline-block; width: 14px; height: 14px; border-width: 2px; vertical-align: -2px; }
+.look-hoje { margin-top: 18px; }
