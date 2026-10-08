@@ -442,5 +442,20 @@
   "✏️ completar": "✏️ 待完善",
   "📁 Escolher uma pasta…": "📁 选择文件夹…",
   "📷 Adicionar várias fotos de uma vez": "📷 一次添加多张照片",
-  "🖼️ Escolher fotos…": "🖼️ 选择照片…"
+  "🖼️ Escolher fotos…": "🖼️ 选择照片…",
+  "Desmarcar todos": "取消全选",
+  "Excluir {n} item? A foto dele também é apagada.": "删除 {n} 件物品？其照片也会一并删除。",
+  "Excluir {n} itens? As fotos deles também são apagadas.": "删除 {n} 件物品？其照片也会一并删除。",
+  "Itens selecionados": "已选物品",
+  "Marcar todos ({n})": "全选（{n}）",
+  "Mover para a mala": "移到行李",
+  "Mover para…": "移到…",
+  "Mudar status": "更改状态",
+  "Selecionar {nome}": "选择 {nome}",
+  "Status…": "状态…",
+  "{n} selecionado": "已选 {n} 件",
+  "{n} selecionados": "已选 {n} 件",
+  "☑️ Selecionar": "☑️ 选择",
+  "✕ Sair da seleção": "✕ 退出选择",
+  "🗑️ Excluir": "🗑️ 删除"
 }

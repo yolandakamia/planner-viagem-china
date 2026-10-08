@@ -122,3 +122,25 @@ export function pesosPorMala(malas: Mala[], itens: Item[], trecho: "ida" | "volt
    display follows the interface language; a renamed bag shows as typed */
 const MALAS_ROT: Record<string, string> = { "Mala despachada": t("Mala despachada"), "Mala de mão": t("Mala de mão"), "Mochila": t("Mochila") };
 export const nomeMala = (m: { nome: string }) => MALAS_ROT[m.nome] ?? m.nome;
+
+/* several items at once (selection mode of the list), in one transaction */
+export async function excluirItens(ids: string[]) {
+  const db = await abrirBanco();
+  const tx = db.transaction(["itens", "fotos"], "readwrite");
+  for (const id of ids) {
+    const it = await tx.objectStore("itens").get(id);
+    if (it?.fotoId) await tx.objectStore("fotos").delete(it.fotoId);
+    await tx.objectStore("itens").delete(id);
+  }
+  await tx.done; avisarMudanca();
+}
+export async function alterarItens(ids: string[], mudanca: Partial<Item>) {
+  const db = await abrirBanco();
+  const tx = db.transaction("itens", "readwrite");
+  const agora = agoraISO();
+  for (const id of ids) {
+    const it = await tx.store.get(id);
+    if (it) await tx.store.put({ ...it, ...mudanca, atualizadoEm: agora });
+  }
+  await tx.done; avisarMudanca();
+}

@@ -22,19 +22,26 @@ export const foraDaMao = (i: Item, malas: Mala[]) =>
   !!i.soMao && malas.find((m) => m.id === i.malaId)?.tipo === "despachada";
 
 /* ---------- one row of the list ---------- */
-export function LinhaItem({ i, malas, volta = false, aoAbrir }: { i: Item; malas: Mala[]; volta?: boolean; aoAbrir: (i: Item) => void }) {
+/* sel: selection mode — the left button becomes a checkbox and tapping the row marks it */
+export function LinhaItem({ i, malas, volta = false, aoAbrir, sel }: {
+  i: Item; malas: Mala[]; volta?: boolean; aoAbrir: (i: Item) => void; sel?: { marcado: boolean; alternar: () => void };
+}) {
   const mala = malas.find((m) => m.id === (volta ? i.malaVoltaId : i.malaId));
   const g = pesoTotal(i);
   return (
-    <div class={`item st-${i.status.replace(" ", "-")}`}>
-      {!volta && (
+    <div class={`item st-${i.status.replace(" ", "-")} ${sel?.marcado ? "marcado" : ""}`}>
+      {sel && (
+        <button class="item-st item-check" role="checkbox" aria-checked={sel.marcado} aria-label={t("Selecionar {nome}", { nome: i.nome })} onClick={sel.alternar}>
+          <span class="item-check-ic">{sel.marcado ? "☑" : "☐"}</span>
+        </button>)}
+      {!sel && !volta && (
         <button class="item-st" aria-label={t("Status: {s}. Tocar para mudar", { s: ROT_STATUS[i.status] ?? i.status })}
           onClick={() => salvarItem({ ...i, status: proximoStatus(i.status) })}>
           <span class="item-st-ic">{ICONE_STATUS[i.status]}</span>
           <span class="item-st-rot">{ROT_STATUS[i.status] ?? i.status}</span>
         </button>)}
-      {volta && <div class="item-st item-st-volta">{ORIGENS_VOLTA[i.origem as keyof typeof ORIGENS_VOLTA]?.emo ?? "📦"}</div>}
-      <button class="item-corpo" onClick={() => aoAbrir(i)}>
+      {!sel && volta && <div class="item-st item-st-volta">{ORIGENS_VOLTA[i.origem as keyof typeof ORIGENS_VOLTA]?.emo ?? "📦"}</div>}
+      <button class="item-corpo" onClick={() => (sel ? sel.alternar() : aoAbrir(i))}>
         <Miniatura fotoId={i.fotoId} class="item-mini" />
         <div class="item-txt">
         <div class="item-nome">{i.nome || t("(sem nome)")}{i.quantidade > 1 && <span class="item-qtd"> ×{i.quantidade}</span>}</div>

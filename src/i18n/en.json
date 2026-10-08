@@ -442,5 +442,20 @@
   "✏️ completar": "✏️ to complete",
   "📁 Escolher uma pasta…": "📁 Choose a folder…",
   "📷 Adicionar várias fotos de uma vez": "📷 Add several photos at once",
-  "🖼️ Escolher fotos…": "🖼️ Choose photos…"
+  "🖼️ Escolher fotos…": "🖼️ Choose photos…",
+  "Desmarcar todos": "Deselect all",
+  "Excluir {n} item? A foto dele também é apagada.": "Delete {n} item? Its photo is deleted too.",
+  "Excluir {n} itens? As fotos deles também são apagadas.": "Delete {n} items? Their photos are deleted too.",
+  "Itens selecionados": "Selected items",
+  "Marcar todos ({n})": "Select all ({n})",
+  "Mover para a mala": "Move to bag",
+  "Mover para…": "Move to…",
+  "Mudar status": "Change status",
+  "Selecionar {nome}": "Select {nome}",
+  "Status…": "Status…",
+  "{n} selecionado": "{n} selected",
+  "{n} selecionados": "{n} selected",
+  "☑️ Selecionar": "☑️ Select",
+  "✕ Sair da seleção": "✕ Done selecting",
+  "🗑️ Excluir": "🗑️ Delete"
 }
