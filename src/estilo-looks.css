@@ -1,0 +1,77 @@
+/* ================= Fase 5: looks ================= */
+.grade-looks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.look-card { display: flex; flex-direction: column; gap: 4px; padding: 8px; text-align: left; cursor: pointer;
+  border-radius: 14px; border: 1px solid var(--linha); background: var(--superficie); min-width: 0; }
+.look-card.on { border: 2px solid var(--acento); }
+.img-look { display: flex; align-items: center; justify-content: center; aspect-ratio: 4 / 5; width: 100%;
+  border-radius: 10px; overflow: hidden; background: #f6f2ef; font-size: 30px; }
+.img-look img { width: 100%; height: 100%; object-fit: contain; }
+.lc-nome { font-weight: 650; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-dias { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.estrela { color: #d99a00; }
+.look-grande .img-look { max-width: 420px; margin: 0 auto 10px; }
+
+/* days with their look */
+.dia-look { display: grid; grid-template-columns: 52px 1fr 80px; gap: 10px; align-items: center;
+  background: var(--superficie); border: 1px solid var(--linha); border-radius: 12px; padding: 10px; }
+.dia-look.lav { border-color: color-mix(in srgb, var(--t-deslocamento) 60%, var(--linha)); }
+.dl-corpo { min-width: 0; }
+.dl-corpo .muted { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-botoes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.btn-lav { min-width: 44px; }
+.dl-botoes .btn { min-height: 36px; padding: 4px 10px; font-size: 13px; }
+.on-lav { background: color-mix(in srgb, var(--t-deslocamento) 22%, var(--superficie)); border-color: var(--t-deslocamento); }
+.dl-look { border: 0; padding: 0; background: none; cursor: pointer; }
+.dl-look .img-look { width: 80px; }
+.dl-mais { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 80px; aspect-ratio: 4 / 5;
+  border: 2px dashed var(--linha); border-radius: 10px; color: var(--texto-2); font-size: 24px; line-height: 1.1; }
+
+/* look of the day on Hoje / calendar */
+.look-dia { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit;
+  background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio); padding: 10px; margin-bottom: 14px; }
+.look-dia .ld-img { flex: none; width: 96px; aspect-ratio: 4 / 5; border-radius: 10px; overflow: hidden; background: #f6f2ef; }
+.look-dia .ld-img img { width: 100%; height: 100%; object-fit: contain; }
+.look-dia .ld-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.look-dia.compacto { padding: 6px 10px; margin-bottom: 10px; }
+.look-dia.compacto .ld-img { width: 44px; }
+.vazio-look { color: var(--texto-2); font-size: 14px; justify-content: center; }
+
+/* fitting room: full screen */
+.provador { position: fixed; inset: 0; z-index: 40; background: var(--fundo); display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+.pv-topo { display: flex; gap: 8px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--linha); background: var(--superficie); }
+.pv-nome { flex: 1; min-width: 0; min-height: 44px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--linha);
+  background: var(--superficie-2); font-weight: 600; }
+.fav-on { color: #d99a00; }
+.pv-meio { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; }
+.pv-agenda { margin: 8px 10px 0; padding: 8px 12px; border-radius: 12px; background: var(--superficie); border: 1px solid var(--linha); font-size: 14px; }
+.pv-agenda-tit { border: 0; background: none; padding: 0; width: 100%; text-align: left; cursor: pointer; }
+.pv-agenda ul { margin: 6px 0 0; padding: 0; list-style: none; }
+.pv-agenda li { padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv-h { display: inline-block; min-width: 44px; color: var(--texto-2); font-variant-numeric: tabular-nums; font-weight: 600; }
+.pv-palco-env { position: relative; margin: 8px auto; width: min(100% - 20px, 460px, (100dvh - 330px) * 0.8); }
+.pv-palco { width: 100%; aspect-ratio: 4 / 5; background: #f6f2ef; border-radius: 14px; overflow: hidden; touch-action: none;
+  box-shadow: inset 0 0 0 1px var(--linha); }
+.pv-carregando, .pv-vazio { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  pointer-events: none; color: #7a6f6a; text-align: center; padding: 20px; font-size: 15px; }
+.provador > .pv-carregando { position: fixed; }
+.pv-acoes { display: flex; gap: 6px; justify-content: center; padding: 6px 10px; flex-wrap: wrap; }
+.pv-acoes .btn { flex: 1; max-width: 120px; white-space: nowrap; padding-inline: 6px; }
+.pv-barra { border-top: 1px solid var(--linha); background: var(--superficie); padding: 8px 0 10px; }
+.pv-filtros { display: flex; gap: 6px; overflow-x: auto; padding: 0 10px 8px; scrollbar-width: none; }
+.pv-filtros::-webkit-scrollbar { display: none; }
+.pv-filtros .chip { flex: none; min-height: 34px; padding: 4px 12px; font-size: 13px; }
+.pv-pecas { display: flex; gap: 8px; overflow-x: auto; padding: 0 10px; scrollbar-width: none; touch-action: pan-x; }
+.pv-pecas::-webkit-scrollbar { display: none; }
+.pv-peca { flex: none; width: 76px; height: 76px; border-radius: 12px; border: 1px solid var(--linha); padding: 4px;
+  display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: pan-x; }
+.pv-peca img { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; -webkit-user-drag: none; }
+.fantasma { position: fixed; z-index: 70; width: 90px; height: 90px; object-fit: contain; pointer-events: none;
+  transform: translate(-50%, -50%); opacity: .85; filter: drop-shadow(0 6px 12px rgb(0 0 0 / .3)); }
+
+/* wide screens: agenda beside the stage */
+@media (min-width: 900px) {
+  .pv-meio { flex-direction: row; align-items: flex-start; justify-content: center; gap: 16px; padding: 10px; }
+  .pv-agenda { width: 260px; margin: 8px 0 0; }
+  .pv-palco-env { margin: 8px 0; }
+}

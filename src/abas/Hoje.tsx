@@ -3,6 +3,7 @@ import type { Viagem } from "../db/tipos";
 import { useDadosViagem } from "../db/useViagem";
 import { CartaoEvento, useEventosFolha } from "../comp/Eventos";
 import { situacoes } from "../lib/agora";
+import { LookDoDia } from "../comp/LookDoDia";
 import { conflitos } from "../lib/tempo";
 import {
   FUSO_BRASIL, FUSO_CHINA, hojeEm, horaEm, dataLonga, dataCurta, diferencaDias,
@@ -65,6 +66,8 @@ export function Hoje({ viagem }: { viagem: Viagem }) {
           <p style="margin:6px 0 0">Último dia: <b>{dataLonga(viagem.fim)}</b>{cidade(diaRef) ? ` · ${cidade(diaRef)}` : ""}</p>
         </div>
       )}
+
+      <LookDoDia dia={dias.find((d) => d.data === diaRef)} />
 
       <h3 class="secao">{antes ? "Programação do primeiro dia" : depois ? "Programação do último dia" : "Programação de hoje"}</h3>
       {choque.size > 0 && <div class="faixa-aviso">⚠️ Há eventos com horários sobrepostos.</div>}

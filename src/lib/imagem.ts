@@ -49,14 +49,14 @@ function caixaVisivel(g: CanvasRenderingContext2D, w: number, h: number) {
 
 /* WebP when the browser can encode it (Safari only recently can);
    otherwise PNG, which also keeps transparency */
-function codificar(c: HTMLCanvasElement, qualidade: number): Promise<Blob> {
+export function codificar(c: HTMLCanvasElement, qualidade: number): Promise<Blob> {
   return new Promise((ok, erro) => c.toBlob((b) => {
     if (b && b.type === "image/webp") return ok(b);
     c.toBlob((p) => (p ? ok(p) : erro(new Error("Não consegui gerar a imagem."))), "image/png");
   }, "image/webp", qualidade));
 }
 
-function reduzir(origem: HTMLCanvasElement, lado: number) {
+export function reduzir(origem: HTMLCanvasElement, lado: number) {
   const k = Math.min(1, lado / Math.max(origem.width, origem.height));
   const { c, g } = canvas(Math.max(1, Math.round(origem.width * k)), Math.max(1, Math.round(origem.height * k)));
   g.imageSmoothingQuality = "high";

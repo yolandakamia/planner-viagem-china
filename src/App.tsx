@@ -5,10 +5,10 @@ import { pedirArmazenamentoPersistente } from "./db/banco";
 import type { Viagem } from "./db/tipos";
 import { IconeHoje, IconeCalendario, IconeMala, IconeLooks, IconeConfig } from "./icones";
 import { Hoje } from "./abas/Hoje";
-import { EmBreve } from "./abas/EmBreve";
 import { Config } from "./abas/Config";
 import { Calendario } from "./abas/Calendario";
 import { MalaAba } from "./abas/Mala";
+import { LooksAba } from "./abas/Looks";
 
 /* Tabs live in the hash (#/hoje …): no server routing needed on GitHub Pages,
    and the Android back button moves between tabs. */
@@ -55,7 +55,7 @@ export function App() {
         {aba === "hoje" && <Hoje viagem={viagem} />}
         {aba === "calendario" && <Calendario viagem={viagem} />}
         {aba === "mala" && <MalaAba />}
-        {aba === "looks" && <EmBreve emo="👔" texto="Os looks chegam na Fase 5." />}
+        {aba === "looks" && <LooksAba viagem={viagem} />}
         {aba === "config" && <Config viagem={viagem} aoSalvar={setViagem} />}
       </main>
       <div class="abas">

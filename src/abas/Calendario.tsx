@@ -3,6 +3,8 @@ import type { Viagem } from "../db/tipos";
 import { useDadosViagem } from "../db/useViagem";
 import { TIPOS } from "../db/eventos";
 import { CartaoEvento, useEventosFolha } from "../comp/Eventos";
+import { LookDoDia } from "../comp/LookDoDia";
+import type { Dia } from "../db/tipos";
 import { conflitos } from "../lib/tempo";
 import { dataLonga, diaSemana, somaDias, hojeDaViagem, listaDias } from "../lib/datas";
 
@@ -35,7 +37,7 @@ export function Calendario({ viagem }: { viagem: Viagem }) {
         <button role="tab" aria-selected={modo === "viagem"} class={modo === "viagem" ? "on" : ""} onClick={() => setModo("viagem")}>Viagem inteira</button>
       </div>
       {modo === "dia"
-        ? <VistaDia data={data} setData={setData} datas={datas} hoje={hoje} cidade={cidade(data)}
+        ? <VistaDia data={data} setData={setData} datas={datas} hoje={hoje} cidade={cidade(data)} dia={dias.find((d) => d.data === data)}
             evs={doDia(data)} abrir={folha.abrir} />
         : <VistaViagem datas={datas} hoje={hoje} cidade={cidade} doDia={doDia}
             irPara={(d) => { setData(d); setModo("dia"); scrollTo(0, 0); }} />}
@@ -45,8 +47,8 @@ export function Calendario({ viagem }: { viagem: Viagem }) {
   );
 }
 
-function VistaDia({ data, setData, datas, hoje, cidade, evs, abrir }: {
-  data: string; setData: (d: string) => void; datas: string[]; hoje: string; cidade: string;
+function VistaDia({ data, setData, datas, hoje, cidade, dia, evs, abrir }: {
+  data: string; dia: Dia | undefined; setData: (d: string) => void; datas: string[]; hoje: string; cidade: string;
   evs: ReturnType<ReturnType<typeof useDadosViagem>["doDia"]>; abrir: Parameters<typeof CartaoEvento>[0]["aoAbrir"];
 }) {
   const choque = conflitos(evs);
@@ -82,6 +84,7 @@ function VistaDia({ data, setData, datas, hoje, cidade, evs, abrir }: {
         </div>
         <button class="btn-icone" aria-label="Dia seguinte" onClick={() => setData(somaDias(data, 1))}>›</button>
       </div>
+      <LookDoDia dia={dia} compacto />
       {choque.size > 0 && <div class="faixa-aviso">⚠️ Há eventos com horários sobrepostos neste dia.</div>}
       {evs.length
         ? <div class="lista-ev">{evs.map((e) => <CartaoEvento e={e} conflito={choque.has(e.id)} aoAbrir={abrir} />)}</div>
